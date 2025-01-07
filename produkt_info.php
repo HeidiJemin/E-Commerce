@@ -34,19 +34,34 @@ include('functions/common_function.php');
   width: 7%;
   height: 7%;
 }
-
-
+footer {
+  margin-top: auto;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
 
 body {
   background-color: #f8f9fa; /* Optional light background */
-  font-family: "Istok Web", sans-serif;
+  
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
-  padding: 0;
+
 }
 /* Custom styling for the black navbar */
 .navbar.bg-black {
   background-color: black !important;
   border: none;
+}
+html {
+  
+  min-height: 100%;
 }
 
 /* Navbar link styling */
@@ -311,8 +326,6 @@ label {
       <div class="col-md-10">
         <div class="row">
             
-        
-        
 
         <?php
              view_more();
@@ -347,15 +360,18 @@ label {
   </ul>
 </div>
     </div>
+    </div>
 
 
 
 
     <!-- footer -->
+     <footer>
     <?php
       include("./includes/footer.php")
     ?>
-    </div>
+    </footer>
+    
 
 
      

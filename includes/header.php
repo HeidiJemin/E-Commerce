@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg bg-black">
+<nav class="navbar navbar-expand-lg bg-black custom-absolute-top">
   <div class="container-fluid">
     <img src="./images/logo.png" alt="" class="logo">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"

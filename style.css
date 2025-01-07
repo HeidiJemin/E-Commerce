@@ -13,10 +13,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
+
 footer {
-  position: absolute;
+  position: relative;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -56,6 +56,7 @@ html {
 .row {
   min-height: 450px;
 }
+
 /* Navbar link styling */
 .navbar .nav-link {
   color: white !important; /* White text for navbar links */

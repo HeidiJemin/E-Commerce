@@ -134,16 +134,31 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
     <!-- Navbar -->
     <?php include("./includes/header.php"); ?>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item ms-3">
-                <a class="nav-link" href="#"><?php echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?></a>
-            </li>
-            <li class="nav-item ms-3">
-                <a class="nav-link" href="logout.php">Logout</a>
-            </li>
-        </ul>
-    </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
+  <ul class="navbar-nav me-auto">
+    <?php
+      if(!isset($_SESSION['id'])){
+        echo '
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="#" style="color: black !important;">Guest</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="login.php" style="color: black !important;">Login</a>
+          </li>
+        ';
+      }else{
+        echo '
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="logout.php" style="color: black !important;">Logout</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="profile.php" style="color: black !important;">Profile</a>
+          </li>
+        ';
+      }
+    ?>
+  </ul>
+</nav>
 
     <div class="bg-light">
         <h3 class="text-center">Hidden Store</h3>

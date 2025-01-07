@@ -3,7 +3,45 @@ session_start();
 include('includes/connect.php');
 include('functions/common_function.php');
 
-// Check if the user is logged in and not verified
+
+if (isset($_SESSION['id'])) {
+        
+} else {
+  // Check if the 'remember_token' cookie is set
+  if (isset($_COOKIE['remember_token'])) {
+      $rememberToken = $_COOKIE['remember_token'];
+
+      // Query the database to find a matching token
+      $query = "SELECT user_id, email, remember_token,verified,name, role_name,role_id FROM users WHERE remember_token = '$rememberToken'"; /// shto kete 
+      $result = mysqli_query($con, $query);
+
+      if ($result && mysqli_num_rows($result) == 1) {
+          // Token matched, log the user in automatically
+          $user = mysqli_fetch_assoc($result);
+
+          // Set session variables
+          $_SESSION['id'] = $user['user_id'];
+          $_SESSION['email'] = $user['email'];
+          $_SESSION['date_time'] = time();
+          $_SESSION['name'] = $user['username'];
+          $_SESSION['role_name'] = $user['role_name'];
+          $_SESSION['role_id'] = $user['role_id'];
+          $_SESSION['verified'] = $user['verified']; //// shto kete 
+
+          // Redirect to the index page (or any other page you prefer)
+
+          if($_SESSION['role_id']==="1"){
+            header("Location: index.php"); // Or the current page
+            exit;
+          }
+          else{
+            header("Location: admin_manage/index.php"); // Or the current page
+            exit;
+          }
+      }
+  }
+}
+// Check if the user is logged in and not verified
 
 ?>
 
@@ -107,6 +145,7 @@ include('functions/common_function.php');
   </ul>
 </div>
     </div>
+    
 
 
 
@@ -114,11 +153,13 @@ include('functions/common_function.php');
 
 
     <!-- footer -->
+     <footer>
     <?php
       include("./includes/footer.php")
     ?>
+    </footer>
     </div>
-
+    
 
      
 

@@ -16,7 +16,7 @@ $rating = isset($_POST['rating']) ? (int)$_POST['rating'] : 0;
 $experienceDate = isset($_POST['experienceDate']) ? htmlspecialchars($_POST['experienceDate']) : '';
 $satisfaction = isset($_POST['satisfaction']) ? htmlspecialchars($_POST['satisfaction']) : '';
 $recommend = isset($_POST['recommend']) ? htmlspecialchars($_POST['recommend']) : '';
-$consent = isset($_POST['consent']) ? htmlspecialchars($_POST['consent']) : '';
+$consent = isset($_POST['consent']) && $_POST['consent'] === 'on' ? 1 : 0;
 $produkt_id = isset($_POST['produkt_id']) ? intval($_POST['produkt_id']) : 0;
 
 // Debug: Log sanitized inputs
@@ -54,7 +54,7 @@ $rating = mysqli_real_escape_string($con, $rating);
 $experienceDate = mysqli_real_escape_string($con, $experienceDate);
 $satisfaction = mysqli_real_escape_string($con, $satisfaction);
 $recommend = mysqli_real_escape_string($con, $recommend);
-$consent = mysqli_real_escape_string($con, $consent);
+
 
 // Check if email already exists
 $checkQuery = "SELECT id FROM testimonials WHERE email = '$email'";
@@ -67,8 +67,8 @@ if ($checkResult && mysqli_num_rows($checkResult) > 0) {
 }
 
 // Insert the testimonial
-$query = "INSERT INTO testimonials (name, email, testimonial, rating, experience_date, satisfaction, recommend, produkt_id)
-          VALUES ('$name', '$email', '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id)";
+$query = "INSERT INTO testimonials (name, email, testimonial, rating, experience_date, satisfaction, recommend, produkt_id,consent)
+          VALUES ('$name', '$email', '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id,$consent)";
 
 // Debug: Log the query
 error_log("SQL Query: $query");
@@ -76,6 +76,7 @@ error_log("SQL Query: $query");
 if (mysqli_query($con, $query)) {
     http_response_code(200);
     echo json_encode([
+        'status' => 'success',
         'success' => true,
         'message' => 'Thank you for your testimonial!',
         'redirect' => './thank_you.php',
