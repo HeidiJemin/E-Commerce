@@ -1,6 +1,6 @@
 <h3 class="text-center text-success">All Products</h3>
 <table id="productTable" >
-    <thead >
+    <thead class="bg-white text-dark" >
         <tr>
             <th>Product ID</th>
             <th>Product Name</th>
@@ -42,3 +42,32 @@
             
     </tbody>
 </table>
+
+<script>
+        $(document).ready(function () {
+            $('#productTable').DataTable();
+        });
+
+        function filterTeamsByLiga() {
+            const ligaId = document.getElementById('produkt_liga').value;
+            const data = new FormData();
+            data.append("liga_id", ligaId);
+
+            $.ajax({
+                type: "POST",
+                url: "fetch_teams.php",
+                async: false,
+                cache: false,
+                processData: false,
+                data: data,
+                contentType: false,
+                success: function (response) {
+                    const ekipSelect = document.getElementById('produkt_ekip');
+                    ekipSelect.innerHTML = `<option value="" disabled selected>Zgjidh nje ekip</option>` + response;
+                },
+                error: function () {
+                    console.error("An error occurred while fetching teams.");
+                }
+            });
+        }
+    </script>

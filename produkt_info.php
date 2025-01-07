@@ -22,20 +22,49 @@ include('functions/common_function.php');
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- css file -->
-  <link rel="stylesheet" href="style.css">
-  
+    
   <style>
     
- 
+    * {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+.logo {
+  width: 7%;
+  height: 7%;
+}
 
-/* Content Wrapper */
-#content-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
+
+
+body {
+  background-color: #f8f9fa; /* Optional light background */
+  font-family: "Istok Web", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+/* Custom styling for the black navbar */
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important; /* White text for navbar links */
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important; /* Hover color for navbar links */
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important; /* Active link color */
+}
+
+/* Toggler icon color */
+.navbar-toggler-icon {
+  background-color: white; /* White icon color */
 }
 
 /* Columns for Layout */
@@ -55,6 +84,14 @@ include('functions/common_function.php');
     margin: 0 auto;
     display: block;
 }
+#content-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+}
+
 
 /* Thumbnails Wrapper */
 #thumbnails-wrapper {
@@ -195,19 +232,37 @@ label {
     text-decoration: none; /* Remove underline from link */
 }
 
-/* Add to Cart button hover effect */
-.add-to-cart-btn:hover {
+/.add-to-cart-btn {
+    background-color: #343a40; /* Dark background */
+    color: #fff; /* White text */
+    border: 1px solid #343a40; /* Matching border */
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-decoration: none; /* Remove underline from link */
+    cursor: not-allowed; /* Default cursor for disabled */
+    opacity: 0.5; /* Reduced opacity for disabled */
+}
+
+/* Hover effect for enabled Add to Cart button */
+.add-to-cart-btn:not(:disabled):hover {
     background-color: #23272b; /* Slightly darker background on hover */
     color: #ffce00; /* Highlighted text on hover */
     border-color: #ffce00; /* Matching hover border */
-    cursor: pointer; /* Hand cursor on hover */
+    cursor: pointer; /* Pointer cursor for enabled button */
+    opacity: 1; /* Ensure full opacity when enabled */
 }
 
-
-
-
-
-
+/* Disabled Add to Cart button */
+.add-to-cart-btn:disabled {
+    pointer-events: none; /* Disable interactions */
+    opacity: 0.5; /* Keeps the opacity low for the disabled state */
+    background-color: #343a40; /* Maintain consistent color */
+    color: #aaa; /* Muted text for disabled state */
+    border: 1px solid #343a40; /* Maintain consistent border */
+}
 
       </style>
 </head>
@@ -220,7 +275,7 @@ label {
 
   <!-- thirrja e cart() -->
   
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
   <ul class="navbar-nav me-auto">
     <?php
       if(!isset($_SESSION['id'])){
@@ -245,6 +300,7 @@ label {
     ?>
   </ul>
 </nav>
+
 
     <div class="bg-light">
       <h3 class="text-center">Hidden Store</h3>

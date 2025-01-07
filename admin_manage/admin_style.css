@@ -1,18 +1,86 @@
 /* General styles for the page */
+html,
 body {
-  background-color: #000; /* Set background to black */
-  color: #fff; /* Default text color to white */
+  margin: 0;
+  padding: 0;
+  height: auto; /* Let the content determine the height */
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensures the footer stays at the bottom */
 }
 
-.footer {
-  background-color: #000;
-  color: #fff;
-  text-align: center;
-  padding: 10px;
-  margin-top: auto; /* Pushes footer to the bottom */
+@import url("https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap");
+.logo {
+  width: 7%;
+  height: 7%;
+}
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.admin_image {
+  width: 100px;
+  object-fit: contain;
+}
+
+.cart-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+/* Custom styling for the black navbar */
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important; /* White text for navbar links */
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important; /* Hover color for navbar links */
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important; /* Active link color */
+}
+
+/* Toggler icon color */
+.navbar-toggler-icon {
+  background-color: white; /* White icon color */
+}
+
+/* Search form button */
+form .btn-outline-light {
+  border-color: #fff !important;
+  color: white !important;
+}
+
+form .btn-outline-light:hover {
+  background-color: #ffce00;
+  color: white !important;
 }
 
 .produkt_img {
@@ -82,11 +150,6 @@ body {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
-}
-
-#productTable thead {
-  background-color: #17a2b8;
-  color: white;
 }
 
 #productTable tbody tr:hover {

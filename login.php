@@ -22,6 +22,14 @@
           <input type="password" id="password" name="password" autocomplete="off" placeholder="Enter your password" required>
           <span id="passwordError" class="error-message"></span>
         </div>
+        
+        <div class="options" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0; margin-bottom: 10px;">
+          <label class="remember-me" style="margin: 0;">
+            <input type="checkbox" id="rememberMe" name="rememberMe"> Remember me
+          </label>
+          <a href="forgot_password.php" class="forgot-password" style="margin: 0;">Forgot Password?</a>
+        </div>
+
         <div class="input-box button">
           <input type="Submit" value="Login Now">
         </div>
@@ -55,6 +63,8 @@
 
     var email = $("#email").val();
     var password = $("#password").val();
+    var rememberMe = $("#rememberMe").is(":checked"); // Check Remember Me option
+
 
     var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // Simple email regex
     var error = 0;
@@ -89,6 +99,8 @@
         data.append("action", "login");
         data.append("email", email);
         data.append("password", password);
+        data.append("rememberMe", rememberMe); // Pass Remember Me status
+
 
         // AJAX call to the backend
         $.ajax({

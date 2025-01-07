@@ -34,10 +34,7 @@ include('functions/common_function.php');
   <?php
       include("./includes/header.php")
     ?>
-      <!-- thirrja e cart() -->
-       <?php
-       cart();
-       ?>
+    
 
 <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
   <ul class="navbar-nav me-auto">

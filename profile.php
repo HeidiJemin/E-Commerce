@@ -40,10 +40,34 @@ $row = mysqli_fetch_assoc($result);
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" href="profilestyle.css">
-    <link rel="stylesheet" href="style.css">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important; /* White text for navbar links */
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important; /* Hover color for navbar links */
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important; /* Active link color */
+}
+
+/* Toggler icon color */
+.navbar-toggler-icon {
+  background-color: white; /* White icon color */
+}
+    </style>
 </head>
 <body>
 

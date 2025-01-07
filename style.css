@@ -3,17 +3,38 @@
   width: 7%;
   height: 7%;
 }
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
 
 .card-img-top {
   width: 100%;
   height: 200px;
   object-fit: contain;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
 }
 
 .admin_image {
@@ -32,6 +53,9 @@
   border: none;
 }
 
+.row {
+  min-height: 450px;
+}
 /* Navbar link styling */
 .navbar .nav-link {
   color: white !important; /* White text for navbar links */

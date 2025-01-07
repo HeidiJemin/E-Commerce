@@ -260,6 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         elseif ($_POST['action'] == "login") {
             $email = mysqli_real_escape_string($con, trim($_POST['email']));
             $password = mysqli_real_escape_string($con, trim($_POST['password']));
+            $rememberMe = isset($_POST['rememberMe']) && $_POST['rememberMe'] === "true";
+
         
             if (empty($password) || strlen($password) < 4) {
                 http_response_code(203);
@@ -280,6 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 users.role_id, 
                                 users.verified,
                                 users.verification_code,
+                                users.remember_token,
                                 users.code_expiration,
                                 roles.name AS role_name
                             FROM 
@@ -327,6 +330,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['name'] = $row['username'];
             $_SESSION['role_name'] = $row['role_name'];
             $_SESSION['verified'] = $row['verified'];
+
+            if ($rememberMe) {
+                // Generate a unique token
+                        // Generate a unique token
+                $rememberToken = bin2hex(random_bytes(64));
+
+                // Store the token in the database
+                $updateTokenQuery = "UPDATE users SET remember_token = ? WHERE user_id = ?";
+                $updateStmt = mysqli_prepare($con, $updateTokenQuery);
+                mysqli_stmt_bind_param($updateStmt, 'si', $rememberToken, $row['user_id']);
+
+                if (!mysqli_stmt_execute($updateStmt)) {
+                    http_response_code(500);
+                    echo json_encode(["success" => false, "message" => "Error updating remember token in the database."]);
+                    exit;
+                }
+
+                // Set the token in a cookie (secure and HTTP-only)
+                setcookie('remember_token', $rememberToken, time() + 86400 * 30, '/', '', true, true); // Cookie valid for 30 days
+             }
         
             // If the user is not verified, send a verification email
             if ($row['verified'] == 0) {
@@ -525,9 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Database update failed: ' . mysqli_error($con)]);
             }
-        }
-        
-        elseif (isset($_POST['action']) && $_POST['action'] == 'updatePassword') {
+        }elseif (isset($_POST['action']) && $_POST['action'] == 'updatePassword') {
                 // Handle password update logic
                 $userId = intval($_POST['id']);
                 $currentPassword = mysqli_real_escape_string($con, $_POST['currentPassword']);
@@ -640,9 +661,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 exit;
             }
-        } else {
-            http_response_code(405); // Invalid method
-            echo json_encode(["message" => "Invalid request method."]);
-        }
+        } 
 }
+           else {
+                http_response_code(405); // Invalid method
+                echo json_encode(["message" => "Invalid request method."]);
+            }
+        
 ?>

@@ -2,38 +2,44 @@
 
 include('./includes/connect.php');
 
-function getprodukt(){
+function getprodukt() {
   global $con;
-  if(!isset($_GET['liga'])){
-      if(!isset($_GET['ekip'])){
+  if (!isset($_GET['liga'])) {
+      if (!isset($_GET['ekip'])) {
           $select_query = "Select * from `produkt` order by rand() limit 0,9";
           $result_query = mysqli_query($con, $select_query);
-          while($row = mysqli_fetch_assoc($result_query)){
-              $produkt_id = $row['produkt_id'];
-              $produkt_name = $row['produkt_name'];
-              $produkt_description = $row['produkt_description'];
-              $produkt_image1 = $row['produkt_image1'];
-              $produkt_price = $row['produkt_price'];
 
-              echo "<div class='col-md-4'>
-              <div class='card'>
+          if (mysqli_num_rows($result_query) > 0) {
+              while ($row = mysqli_fetch_assoc($result_query)) {
+                  $produkt_id = $row['produkt_id'];
+                  $produkt_name = $row['produkt_name'];
+                  $produkt_description = $row['produkt_description'];
+                  $produkt_image1 = $row['produkt_image1'];
+                  $produkt_price = $row['produkt_price'];
 
-                <div class='imgBox'>
-                  <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
-                </div>
-
-                <div class='contentBox'>
-                  <h3>$produkt_name</h3>
-                  <h2 class='price'>$produkt_price €</h2>
-                  <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
-                </div>
-
-              </div>
-            </div>";
+                  echo "<div class='col-md-4'>
+                          <div class='card'>
+                              <div class='imgBox'>
+                                  <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
+                              </div>
+                              <div class='contentBox'>
+                                  <h3>$produkt_name</h3>
+                                  <h2 class='price'>$produkt_price €</h2>
+                                  <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
+                              </div>
+                          </div>
+                        </div>";
+              }
+          } else {
+              // Display a placeholder message when no products are found
+              echo "<div class='text-center' style='width: 100%; padding: 20px;min-height:450px;'>
+                      <h4>No products available at the moment.</h4>
+                    </div>";
           }
       }
   }
 }
+
 
 
 
@@ -62,6 +68,8 @@ function get_all_produkt(){
                   <h3>$produkt_name</h3>
                   <h2 class='price'>$produkt_price €</h2>
                   <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
+                  
+
                 </div>
 
               </div>
@@ -91,17 +99,22 @@ function getproduktbyliga(){
         $liga_id=$row['liga_id'];
         $ekip_id=$row['ekip_id'];
         echo "<div class='col-md-4'>
-        <div class='card' style='width: 18rem;'>
-          <img src='./admin_manage/produkt_image/$produkt_image1' class='card-img-top' alt='$produkt_name'>
-          <div class='card-body'>
-            <h5 class='card-title'>$produkt_name</h5>
-            <p class='card-text'>$produkt_description</p>
-            <p class='card-text'>$produkt_price $</p>
-            <a href='index.php?add_to_cart=$produkt_id' class='btn btn-info'>Add To Cart</a>
-             <a href='produkt_info.php?produkt_id=$produkt_id' class='btn btn-secondary'>View More</a>
-          </div>
-        </div>
-      </div>";
+              <div class='card'>
+
+                <div class='imgBox'>
+                  <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
+                </div>
+
+                <div class='contentBox'>
+                  <h3>$produkt_name</h3>
+                  <h2 class='price'>$produkt_price €</h2>
+                  <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
+                  
+
+                </div>
+
+              </div>
+            </div>";
       }
     }
 }
@@ -125,17 +138,22 @@ function getproduktbyekip(){
         $liga_id=$row['liga_id'];
         $ekip_id=$row['ekip_id'];
         echo "<div class='col-md-4'>
-        <div class='card' style='width: 18rem;'>
-          <img src='./admin_manage/produkt_image/$produkt_image1' class='card-img-top' alt='$produkt_name'>
-          <div class='card-body'>
-            <h5 class='card-title'>$produkt_name</h5>
-            <p class='card-text'>$produkt_description</p>
-            <p class='card-text'>$produkt_price $</p>
-            <a href='index.php?add_to_cart=$produkt_id' class='btn btn-info'>Add To Cart</a>
-             <a href='produkt_info.php?produkt_id=$produkt_id' class='btn btn-secondary'>View More</a>
-          </div>
-        </div>
-      </div>";
+              <div class='card'>
+
+                <div class='imgBox'>
+                  <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
+                </div>
+
+                <div class='contentBox'>
+                  <h3>$produkt_name</h3>
+                  <h2 class='price'>$produkt_price €</h2>
+                  <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
+                  
+
+                </div>
+
+              </div>
+            </div>";
       }
     }
 }
@@ -298,7 +316,9 @@ function getekip(){
     
                         <!-- Add to Cart Button -->
                         <a class='btn add-to-cart-btn' id='addToCartBtn' href='' data-produkt-id='$produkt_id'>Add to Cart</a>
-                    </div>
+                        <a href='review.php?produkt_id=$produkt_id' class='btn btn-primary mb-2'>Review</a>
+
+                        </div>
                 </div>
     
                 <!-- Inline JavaScript -->
@@ -341,7 +361,11 @@ function getekip(){
     
                         // Add to Cart Logic
                         addToCartButton.addEventListener('click', function (event) {
-                            event.preventDefault();
+                            if (this.disabled) {
+        // Prevent any action if the button is disabled
+        event.preventDefault();
+        return;
+    }
     
                             if (selectedSize && selectedSizeId) {
                                 const produktId = this.getAttribute('data-produkt-id');
@@ -382,6 +406,7 @@ function getekip(){
             }
         }
     }
+    
     
       
     

@@ -31,84 +31,86 @@
     function register_user(event) {
         event.preventDefault(); // Prevent form submission
 
-        var name = $("#name").val();
-        var surname = $("#surname").val();
-        var username = $("#username").val();
-        var email = $("#email").val();
-        var password = $("#password").val();
-        var confirmPassword = $("#conf_password").val();
-        var termsAccepted = $("#terms").is(":checked");
+    var name = $("#name").val();
+    var surname = $("#surname").val();
+    var username = $("#username").val();
+    var email = $("#email").val();
+    var password = $("#password").val();
+    var confirmPassword = $("#conf_password").val();
+    var termsAccepted = $("#terms").is(":checked");
 
-        var nameRegex = /^[a-zA-Z ]{3,20}$/;
-        var passwordRegex = /^[a-zA-Z0-9-_ ]{4,}$/;
+    var nameRegex = /^[A-Z][a-zA-Z ]{2,19}$/; // First letter capital, 3-20 chars
+    var usernameRegex = /^[a-zA-Z0-9-_]{3,20}$/; // Username rules
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Valid email format
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; // Strong password
 
-        var error = 0;
-        
-        // Validate first name
-        if (!nameRegex.test(name)) {
-            $("#name").addClass("error");
-            $("#nameError").text("Emri vetem karaktere, minimumi 3");
-            error++;
-        } else {
-            $("#name").removeClass("error");
-            $("#nameError").text("");
-        }
+    var error = 0;
 
-        // Validate surname
-        if (!nameRegex.test(surname)) {
-            $("#surname").addClass("error");
-            $("#surnameError").text("Mbiemri vetem karaktere, minimumi 3");
-            error++;
-        } else {
-            $("#surname").removeClass("error");
-            $("#surnameError").text("");
-        }
+    // Validate first name
+    if (!nameRegex.test(name)) {
+        $("#name").addClass("error");
+        $("#nameError").text("Emri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        error++;
+    } else {
+        $("#name").removeClass("error");
+        $("#nameError").text("");
+    }
 
-        // Validate name
-if (!nameRegex.test(name)) {
-    $("#username").addClass("error"); // Add error styling to the input
-    $("#usernameError").text("Emri vetem karaktere, minimumi 3"); // Show error message
-    error++;
-} else {
-    $("#username").removeClass("error"); // Remove error styling
-    $("#usernameError").text(""); // Clear the error message (but keep space)
-}
+    // Validate surname
+    if (!nameRegex.test(surname)) {
+        $("#surname").addClass("error");
+        $("#surnameError").text("Mbiemri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        error++;
+    } else {
+        $("#surname").removeClass("error");
+        $("#surnameError").text("");
+    }
 
-// Validate email
-if (isEmpty(email)) {
-    $("email").addClass("error");
-    $("#emailError").text("Email nuk mund te jete bosh");
-    error++;
-} else {
-    $("#user_email").removeClass("error");
-    $("#emailError").text(""); // Clear the error message
-}
+    // Validate username
+    if (!usernameRegex.test(username)) {
+        $("#username").addClass("error");
+        $("#usernameError").text("Username duhet të jetë 3-20 karaktere dhe mund të përmbajë vetëm shkronja, numra, '-' ose '_'.");
+        error++;
+    } else {
+        $("#username").removeClass("error");
+        $("#usernameError").text("");
+    }
 
-// Validate terms acceptance
-if (!$("#terms").is(":checked")) {
-    $("#termsError").text("Duhet te pranoni termat dhe kushtet"); // Show error
-    error++;
-} else {
-    $("#termsError").text(""); // Clear the error
-}
+    // Validate email
+    if (!emailRegex.test(email)) {
+        $("#email").addClass("error");
+        $("#emailError").text("Ju lutem vendosni një email të vlefshëm.");
+        error++;
+    } else {
+        $("#email").removeClass("error");
+        $("#emailError").text("");
+    }
 
-// Validate password
-if (!passwordRegex.test(password)) {
-    $("password").addClass("error");
-    $("#passwordError").text("Password duhet minimumi 4 karaktere");
-    error++;
-} else if (password !== confirmPassword) {
-    $("#password").addClass("error");
-    $("#conf_password").addClass("error");
-    $("#passwordError").text("Passwordet nuk jane te barabarta");
-    $("#confirmPasswordError").text("Passwordet nuk jane te barabarta");
-    error++;
-} else {
-    $("#password").removeClass("error");
-    $("#conf_password").removeClass("error");
-    $("#passwordError").text(""); // Clear error
-    $("#confirmPasswordError").text(""); // Clear error
-}
+    // Validate password
+    if (!passwordRegex.test(password)) {
+        $("#password").addClass("error");
+        $("#passwordError").text("Password duhet të ketë min 8 karaktere, një shkronjë të madhe, një të vogël, një numër dhe një simbol.");
+        error++;
+    } else if (password !== confirmPassword) {
+        $("#password").addClass("error");
+        $("#conf_password").addClass("error");
+        $("#passwordError").text("Passwordet nuk përputhen.");
+        $("#confirmPasswordError").text("Passwordet nuk përputhen.");
+        error++;
+    } else {
+        $("#password").removeClass("error");
+        $("#conf_password").removeClass("error");
+        $("#passwordError").text("");
+        $("#confirmPasswordError").text("");
+    }
+
+    // Validate terms acceptance
+    if (!termsAccepted) {
+        $("#termsError").text("Duhet të pranoni termat dhe kushtet.");
+        error++;
+    } else {
+        $("#termsError").text("");
+    }
     // If no errors, proceed with AJAX
     if (error == 0) {
         var data = new FormData();

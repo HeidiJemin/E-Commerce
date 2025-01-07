@@ -1,14 +1,15 @@
 <?php
-if (isset($_GET['delete_ekip'])) {
-    $delete_ekip = $_GET['delete_ekip'];
-    
+include('../includes/connect.php');
 
-    $delete_query = "DELETE FROM `ekip` WHERE ekip_id = $delete_ekip";
-    $result = mysqli_query($con, $delete_query);
-    
-    if ($result) {
-        echo "<script>alert('Ekipi u fshi');</script>";
-        echo "<script>window.open('./index.php?shiko_ekip', '_self');</script>";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ekip_id'])) {
+    $ekip_id = intval($_POST['ekip_id']);
+    $query = "DELETE FROM `ekip` WHERE `ekip_id` = $ekip_id";
+    if (mysqli_query($con, $query)) {
+        echo "Ekip deleted successfully.";
+    } else {
+        http_response_code(500);
+        echo "Failed to delete ekip.";
     }
 }
+mysqli_close($con);
 ?>

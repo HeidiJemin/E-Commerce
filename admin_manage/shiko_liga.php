@@ -30,7 +30,7 @@
         <td><?php echo $number; ?></td>
         <td><?php echo $liga_name; ?></td>
         <td><a href="index.php?edit_liga=<?php echo $liga_id ?>"><i class="fa-solid fa-pen-to-square"></i></a></td>
-        <td><a href=""><i class="fa-solid fa-trash"></i></a></td>
+        <td><a href="index.php?delete_liga=<?php echo $liga_id ?>"><i class="fa-solid fa-trash"></i></a></td>
       </tr>
     <?php
     }

@@ -68,7 +68,7 @@ include('functions/common_function.php');
 
     <div class="bg-light">
       <h3 class="text-center">Hidden Store</h3>
-      <p class="text-center">Welcome to the world of football jerseys</p>
+      <p class="text-center">Welcomes</p>
     </div>
 
     <div class="row px-1 mb-3">
