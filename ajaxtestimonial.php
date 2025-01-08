@@ -65,10 +65,24 @@ if ($checkResult && mysqli_num_rows($checkResult) > 0) {
     echo json_encode(['success' => false, 'message' => 'A testimonial with this email already exists.']);
     exit;
 }
+$image_url = ""; 
+$query_image = "SELECT foto FROM users WHERE email = '$email'";
+$result_image = mysqli_query($con, $query_image); 
+
+if ($result_image && mysqli_num_rows($result_image) > 0) { 
+    $row_image = mysqli_fetch_assoc($result_image);
+    $image_url = isset($row_image['foto']) && !empty($row_image['foto']) 
+        ? $row_image['foto'] 
+        : 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg'; 
+} else {
+    // Default image URL if the query fails or no result is found
+    $image_url = 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
+}
+
 
 // Insert the testimonial
-$query = "INSERT INTO testimonials (name, email, testimonial, rating, experience_date, satisfaction, recommend, produkt_id,consent)
-          VALUES ('$name', '$email', '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id,$consent)";
+$query = "INSERT INTO testimonials (name, email, testimonial, rating, experience_date, satisfaction, recommend, produkt_id,consent,image_url)
+          VALUES ('$name', '$email', '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id,$consent,'$image_url')";
 
 // Debug: Log the query
 error_log("SQL Query: $query");

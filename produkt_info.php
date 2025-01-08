@@ -15,14 +15,17 @@ include('functions/common_function.php');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-Commerce Website </title>
+
   <!-- bootstrap CSS link -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <!-- font awesome link -->
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+
+
   <style>
     
     * {
@@ -247,7 +250,7 @@ label {
     text-decoration: none; /* Remove underline from link */
 }
 
-/.add-to-cart-btn {
+.add-to-cart-btn {
     background-color: #343a40; /* Dark background */
     color: #fff; /* White text */
     border: 1px solid #343a40; /* Matching border */
@@ -280,6 +283,114 @@ label {
 }
 
       </style>
+
+<style>
+  /* Fullscreen section with black background */
+  .testimonials-section {
+    background-color: #000; /* Black background for the entire section */
+    min-height: 100vh; /* Ensure at least full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  /* Center container for the cards */
+  .testimonials-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 1200px; /* Limit the maximum width for layout consistency */
+    margin: 0 auto;
+  }
+
+  /* Title inside the testimonials section */
+  .testimonials-container h2 {
+    font-size: 2.5em;
+    color: black; /* White text for better visibility */
+    margin-bottom: 20px;
+  }
+
+  .testimonials-container .description {
+    color: black; /* White text for better visibility */
+    font-size: 1em;
+    margin-bottom: 40px;
+  }
+
+  /* Cards wrapper */
+  .testimonials {
+    display: flex;
+    justify-content: space-between;
+    /*gap: 20px;*/
+    flex-wrap: wrap;
+    width: 100%; /* Ensure it uses full width of container */
+    margin-left: 90px;
+    background-color:black;
+
+  }
+
+  /* Styling for each card */
+  .card {
+    background-color: #ffeb3b; /* Yellow background for cards */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Darker shadow to match the black background */
+    padding: 20px;
+    width: calc(33.333% - 20px); /* Adjust for 3 cards per row, accounting for the gap */
+    max-width: 300px;
+    text-align: center;
+    border: 2px solid white;
+    margin: 10px;
+  }
+
+  /* Hover effect for the cards */
+  .card:hover {
+    transform: translateY(-10px);
+    transition: 0.3s ease-in-out;
+  }
+
+  /* Circular image container */
+  .image-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+
+  /* Image inside the container */
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Card heading */
+  .card h3 {
+    font-size: 1.25em;
+    color: #333; /* Dark text */
+    margin-bottom: 10px;
+  }
+
+  /* Styling for the quote text */
+  .card .quote {
+    font-style: italic;
+    color: #555; /* Darker text */
+    font-size: 0.9em;
+  }
+
+  .description{ 
+    margin-left: 90px;
+  }
+  h2 { 
+    margin-left: 10px;
+  }
+</style>
+
+
+
+
 </head>
 
 <body>
