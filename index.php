@@ -41,7 +41,7 @@ if (isset($_SESSION['id'])) {
       }
   }
 }
-// Check if the user is logged in and not verified
+
 
 ?>
 
@@ -63,7 +63,24 @@ if (isset($_SESSION['id'])) {
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="produkt_style.css">
   
- 
+ <style>
+  .favourite-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    color: white;
+    background-color: grey;
+    transition: background-color 0.3s ease;
+}
+
+.favourite-btn.favourited {
+    background-color: red;
+}
+
+ </style>
 
 </head>
 
@@ -173,5 +190,48 @@ if (isset($_SESSION['id'])) {
       crossorigin="anonymous"></script>
 
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const favButtons = document.querySelectorAll(".favourite-btn");
+
+        favButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const produktId = button.getAttribute("data-produkt-id");
+
+                // Determine action: Add or Remove
+                const action = button.classList.contains("favourited") ? "remove" : "add";
+
+                // AJAX request
+                fetch("favourites_handler.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        produkt_id: produktId,
+                        action: action,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            // Toggle button class and text
+                            button.classList.toggle("favourited");
+                            if (button.classList.contains("favourited")) {
+                                button.textContent = "Remove from Favourites";
+                            } else {
+                                button.textContent = "Add to Favourites";
+                            }
+                        } else {
+                            alert(data.message || "An error occurred.");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            });
+        });
+    });
+</script>
 
 </html>
