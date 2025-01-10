@@ -40,8 +40,10 @@ function getprodukt() {
 
               // Add to Favourites button if the user is logged in
               if (isset($_SESSION['id'])) {
+                  $btn_class = $is_favourited ? 'favourited' : '';
+                  $btn_text = $is_favourited ? 'Remove from Favourites' : 'Add to Favourites';
                   echo "<button class='favourite-btn $btn_class' data-produkt-id='$produkt_id'>
-                            $favourite_text
+                            $btn_text
                         </button>";
               }
 
@@ -311,7 +313,8 @@ function getekip(){
         global $con;
         if (isset($_GET['produkt_id'])) {
             $produkt_id = $_GET['produkt_id'];
-    
+
+
             // Fetch product details
             $select_query = "SELECT * FROM produkt WHERE produkt_id = $produkt_id";
             $result_query = mysqli_query($con, $select_query);
@@ -369,6 +372,9 @@ function getekip(){
                     // Handle query failure
                     echo "Error fetching size data: " . mysqli_error($con);
                 }
+
+
+
     
                 // Render size buttons dynamically
                 foreach ($all_sizes as $size) {
@@ -380,6 +386,8 @@ function getekip(){
                     // Render the size button
                     echo "<button class='size-btn $class' data-size='$size' data-size-id='$size_id' $disabled>$size</button>";
                 }
+
+               
     
                 echo "
                             </div>
@@ -391,6 +399,10 @@ function getekip(){
 
                         </div>
                 </div>
+
+                
+
+
     
                 <!-- Inline JavaScript -->
                 <script>
@@ -432,9 +444,9 @@ function getekip(){
     
                         // Add to Cart Logic
                         addToCartButton.addEventListener('click', function (event) {
+                        event.preventDefault();
                             if (this.disabled) {
-        // Prevent any action if the button is disabled
-        event.preventDefault();
+        
         return;
     }
     
@@ -474,6 +486,44 @@ function getekip(){
                         });
                     });
                 </script>";
+
+                echo "<div class='testimonials-container'>
+                <h2>Reviews</h2>
+                <p class='description'>
+                   We are committed to delivering products that make a difference. But don’t just take our word for it — read what our customers have to say! Their stories reflect our dedication to quality, service, and innovation.
+
+
+                </p>";
+
+            // Fetch testimonials for the product
+            $testimonial_query = "SELECT * FROM testimonials WHERE produkt_id = $produkt_id ORDER BY id DESC";
+            $testimonial_result = mysqli_query($con, $testimonial_query);
+
+            if (mysqli_num_rows($testimonial_result) > 0) {
+                echo "<div class='testimonials'>";
+                while ($testimonial = mysqli_fetch_assoc($testimonial_result)) {
+                  
+                    $image_url = $testimonial['image_url'] ?: 'https://via.placeholder.com/100';
+                    $name = htmlspecialchars($testimonial['name']);
+                    $quote = htmlspecialchars($testimonial['testimonial']);
+
+                    echo "
+                    <div class='card'>
+                        <div class='image-container'>
+                            <img src='$image_url' alt='$name'>
+                        </div>
+                        <h3>$name</h3>
+                        <p class='quote'>\"$quote\"</p>
+                    </div>";
+                }
+                echo "</div>";
+            } else {
+                echo "<p>No testimonials available for this product yet.</p>";
+            }
+
+            echo "</div>"; 
+
+
             }
         }
     }
