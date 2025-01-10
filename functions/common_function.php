@@ -4,42 +4,113 @@ include('./includes/connect.php');
 
 function getprodukt() {
   global $con;
-  if (!isset($_GET['liga'])) {
-      if (!isset($_GET['ekip'])) {
-          $select_query = "Select * from `produkt` order by rand() limit 0,9";
-          $result_query = mysqli_query($con, $select_query);
+  if (!isset($_GET['liga']) && !isset($_GET['ekip'])) {
+      $select_query = "SELECT * FROM produkt ORDER BY RAND() LIMIT 0,9";
+      $result_query = mysqli_query($con, $select_query);
 
-          if (mysqli_num_rows($result_query) > 0) {
-              while ($row = mysqli_fetch_assoc($result_query)) {
-                  $produkt_id = $row['produkt_id'];
-                  $produkt_name = $row['produkt_name'];
-                  $produkt_description = $row['produkt_description'];
-                  $produkt_image1 = $row['produkt_image1'];
-                  $produkt_price = $row['produkt_price'];
+      if (mysqli_num_rows($result_query) > 0) {
+          while ($row = mysqli_fetch_assoc($result_query)) {
+              $produkt_id = $row['produkt_id'];
+              $produkt_name = $row['produkt_name'];
+              $produkt_description = $row['produkt_description'];
+              $produkt_image1 = $row['produkt_image1'];
+              $produkt_price = $row['produkt_price'];
 
-                  echo "<div class='col-md-4'>
-                          <div class='card'>
-                              <div class='imgBox'>
-                                  <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
-                              </div>
-                              <div class='contentBox'>
-                                  <h3>$produkt_name</h3>
-                                  <h2 class='price'>$produkt_price €</h2>
-                                  <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
-                              </div>
-                          </div>
-                        </div>";
+              // Check if the product is in the favourites for the logged-in user
+              $is_favourited = false;
+              if (isset($_SESSION['id'])) {
+                  $user_id = $_SESSION['id'];
+                  $fav_query = "SELECT * FROM favourites WHERE produkt_id = $produkt_id AND user_id = $user_id";
+                  $fav_result = mysqli_query($con, $fav_query);
+                  $is_favourited = mysqli_num_rows($fav_result) > 0;
               }
-          } else {
-              // Display a placeholder message when no products are found
-              echo "<div class='text-center' style='width: 100%; padding: 20px;min-height:450px;'>
-                      <h4>No products available at the moment.</h4>
+
+              $favourite_text = $is_favourited ? 'Remove from Favourites' : 'Add to Favourites';
+              $btn_class = $is_favourited ? 'favourited' : '';
+
+              echo "<div class='col-md-4'>
+                      <div class='card'>
+                          <div class='imgBox'>
+                              <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
+                          </div>
+                          <div class='contentBox'>
+                              <h3>$produkt_name</h3>
+                              <h2 class='price'>$produkt_price €</h2>
+                              <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>";
+
+              // Add to Favourites button if the user is logged in
+              if (isset($_SESSION['id'])) {
+                  echo "<button class='favourite-btn $btn_class' data-produkt-id='$produkt_id'>
+                            $favourite_text
+                        </button>";
+              }
+
+              echo "    </div>
+                      </div>
                     </div>";
           }
+      } else {
+          // Placeholder message when no products are found
+          echo "<div class='text-center' style='width: 100%; padding: 20px; min-height: 450px;'>
+                  <h4>No products available at the moment.</h4>
+                </div>";
       }
   }
 }
 
+
+
+
+function get_all_favourites() {
+  global $con;
+
+  if (isset($_SESSION['id'])) {
+      $user_id = $_SESSION['id'];
+
+      $query = "SELECT p.* FROM favourites f 
+                INNER JOIN produkt p ON f.produkt_id = p.produkt_id 
+                WHERE f.user_id = ?";
+                
+      $stmt = mysqli_prepare($con, $query);
+      mysqli_stmt_bind_param($stmt, "i", $user_id);
+      mysqli_stmt_execute($stmt);
+      $result = mysqli_stmt_get_result($stmt);
+
+      if (mysqli_num_rows($result) > 0) {
+          while ($row = mysqli_fetch_assoc($result)) {
+              $produkt_id = $row['produkt_id'];
+              $produkt_name = $row['produkt_name'];
+              $produkt_description = $row['produkt_description'];
+              $produkt_image1 = $row['produkt_image1'];
+              $produkt_price = $row['produkt_price'];
+
+              echo "<div class='col-md-4'>
+                      <div class='card'>
+                          <div class='imgBox'>
+                              <img src='./admin_manage/produkt_image/$produkt_image1' alt='$produkt_name' class='mouse'>
+                          </div>
+                          <div class='contentBox'>
+                              <h3>$produkt_name</h3>
+                              <h2 class='price'>$produkt_price €</h2>
+                              <a href='produkt_info.php?produkt_id=$produkt_id' class='buy'>View More</a>
+                              <button class='favourite-btn favourited' data-produkt-id='$produkt_id'>
+                                  Remove from Favourites
+                              </button>
+                          </div>
+                      </div>
+                    </div>";
+          }
+      } else {
+          echo "<div class='text-center ' style='width: 100%; padding: 20px; min-height: 450px;'>
+                  <h4>No favourite products yet.</h4>
+                </div>";
+      }
+  } else {
+      echo "<div class='text-center' style='width: 100%; padding: 20px; min-height: 450px;'>
+              <h4>Please log in to see your favourites.</h4>
+            </div>";
+  }
+}
 
 
 

@@ -23,6 +23,9 @@
           <a class="nav-link" href="#">Contact</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="./favourites.php">Favourites</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="my_orders.php">My Orders</a>
         </li>
         <li class="nav-item">
