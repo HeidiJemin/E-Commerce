@@ -13,8 +13,8 @@ require './libraries/phpmailer/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$GMAIL_ADDRESS = 'grupiweb@gmail.com';
-$GMAIL_ADDRESS_PASSWORD = 'amly jexm cjfv amez';
+$GMAIL_ADDRESS = 'trendytrend2803@gmail.com';
+$GMAIL_ADDRESS_PASSWORD = 'iwsc jlrv aoyc dbpa';
 
 
 
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Regular expressions for validation
             $nameRegex = "/^[a-zA-Z ]{3,20}$/"; // Name must be between 3-20 characters, letters and spaces only
-            $passwordRegex = "/^[a-zA-Z0-9-_ ]{4,}$/"; // Password must be at least 4 characters, alphanumeric, with optional special chars
+            $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/"; // Password must be at least 4 characters, alphanumeric, with optional special chars
 
             // Validate first name
             if (!preg_match($nameRegex, $name)) {
@@ -59,12 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Validate name
-            if (!preg_match($nameRegex, $name)) {
+            if (!preg_match($nameRegex, $username)) {
                 http_response_code(203);
                 echo json_encode([
-                    "message" => "Emri vetem karaktere, minimumi 3",
-                    "tagError" => "nameError",
-                    "tagElement" => "name"
+                    "message" => "Username vetem karaktere, minimumi 3",
+                    "tagError" => "usernameError",
+                    "tagElement" => "username"
                 ]);
                 exit;
             }
@@ -80,16 +80,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
+            
+
             // Validate password
-            if (empty($password) || strlen($password) < 4) {
+            if (empty($password) || strlen($password) < 8) {
                 http_response_code(203);
                 echo json_encode([
-                    "message" => "Passwordi minimumi 4 karaktere.",
+                    "message" => "Passwordi minimumi 8 karaktere.",
                     "tagError" => "passwordError",
                     "tagElement" => "password"
                 ]);
                 exit;
             }
+
+
+            if (!preg_match($passwordRegex, $password)) {
+                // Check if the password does not meet the regex requirements
+                http_response_code(203);
+                echo json_encode([
+                    "message" => "Passwordi duhet të përmbajë të paktën një shkronjë të madhe, një të vogël, një numër dhe një karakter special.",
+                    "tagError" => "passwordError",
+                    "tagElement" => "password"
+                ]);
+                exit;
+            }
+
+          
 
             // Check if password and confirm password match
             if ($password !== $confirmPassword) {
@@ -218,9 +234,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "message" => "Useri u ruajt me sukses. Verifikimi i email-it eshte derguar.",
                 "location" => "./verify.php"  // Redirect to verification page
             ]);
-            exit;
 
             mysqli_close($con);
+            exit;
+
+            
         } elseif ($_POST['action'] == "verifyCode") {
             if (!isset($_SESSION['email'])) {
                 http_response_code(400);
@@ -255,18 +273,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "message" => "Invalid or expired verification code."
                 ]);
             }
+            mysqli_close($con);
             exit;
         }
         elseif ($_POST['action'] == "login") {
             $email = mysqli_real_escape_string($con, trim($_POST['email']));
             $password = mysqli_real_escape_string($con, trim($_POST['password']));
             $rememberMe = isset($_POST['rememberMe']) && $_POST['rememberMe'] === "true";
+            $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/"; // Password must be at least 4 characters, alphanumeric, with optional special chars
 
         
-            if (empty($password) || strlen($password) < 4) {
+            if (empty($password) || strlen($password) < 8) {
                 http_response_code(203);
                 echo json_encode([
-                    "message" => "Password must be at least 4 characters.",
+                    "message" => "Password must be at least 8 characters.",
+                    "tagError" => "passwordError",
+                    "tagElement" => "password"
+                ]);
+                exit;
+            }
+
+            if (!preg_match($passwordRegex, $password)) {
+                // Check if the password does not meet the regex requirements
+                http_response_code(203);
+                echo json_encode([
+                    "message" => "Passwordi duhet të përmbajë të paktën një shkronjë të madhe, një të vogël, një numër dhe një karakter special.",
                     "tagError" => "passwordError",
                     "tagElement" => "password"
                 ]);
@@ -406,6 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "message" => "Could not send verification email. Please try again later.",
                         "error" => $mail->ErrorInfo
                     ]);
+                    mysqli_close($con);
                     exit;
                 }
             }
@@ -430,6 +462,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "verified" => true,
                 "location" => $location
             ]);
+            mysqli_close($con);
             exit;
         }
         
@@ -443,12 +476,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
             // Validation for user fields
             if (!preg_match("/^[A-Z][a-zA-Z ]{2,19}$/", $name)) {
-                echo json_encode(['status' => 'error', 'field' => 'name', 'message' => 'Name must start with a capital letter and be 3-20 characters long.']);
+                echo json_encode(['status' => 'error', 'field' => 'name', 'message' => 'Name must start with a capital letter and be 3-20 characters long.No-Numbers']);
                 exit;
             }
         
             if (!preg_match("/^[A-Z][a-zA-Z ]{2,19}$/", $surname)) {
-                echo json_encode(['status' => 'error', 'field' => 'surname', 'message' => 'Surname must start with a capital letter and be 3-20 characters long.']);
+                echo json_encode(['status' => 'error', 'field' => 'surname', 'message' => 'Surname must start with a capital letter and be 3-20 characters long.No-Numbers']);
                 exit;
             }
         
@@ -533,10 +566,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        <a href='http://yourwebsite.com/verify.php'>Verify Now</a>";
                         $mail->send();
                     } catch (Exception $e) {
+                        mysqli_close($con); 
                         echo json_encode(['status' => 'error', 'message' => 'Could not send verification email.']);
                         exit;
                     }
-        
                     echo json_encode([
                         'status' => 'success',
                         'message' => 'Profile updated successfully. Verification email sent to the new address.',
@@ -545,9 +578,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully.']);
                 }
+            
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Database update failed: ' . mysqli_error($con)]);
             }
+            mysqli_close($con);
+
         }elseif (isset($_POST['action']) && $_POST['action'] == 'updatePassword') {
                 // Handle password update logic
                 $userId = intval($_POST['id']);
@@ -560,6 +596,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if (!$result) {
                     echo json_encode(['status' => 'error', 'message' => 'Database query failed: ' . mysqli_error($con)]);
+                    mysqli_close($con); 
                     exit;
                 }
 
@@ -572,6 +609,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Check if the new password meets the length requirement
                         if (strlen($newPassword) < 8) {
                             echo json_encode(['status' => 'error', 'message' => 'Password must be at least 8 characters long.']);
+                            mysqli_close($con); 
+                            exit;
+                        }
+                        $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/"; // At least one lowercase, one uppercase, one digit, one special character, and 8+ characters
+                        if (!preg_match($passwordRegex, $newPassword)) {
+                            echo json_encode([
+                                'status' => 'error',
+                                'message' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+                            ]);
+                            mysqli_close($con); 
                             exit;
                         }
 
@@ -593,6 +640,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // User not found
                     echo json_encode(['status' => 'error', 'message' => 'User not found.']);
                 }
+                mysqli_close($con); 
             } elseif ($_POST['action'] === 'resendVerification') {
                 if (!isset($_SESSION['email'])) {
                     http_response_code(400);
@@ -609,7 +657,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Get the current time and set expiration date (1 hour from now)
                 $expirationDate = date("Y-m-d H:i:s", strtotime("+24 hour"));
-
+                
                 // Store the new verification code and expiration date in the database
                 $query_update_code = "UPDATE users SET verification_code = '$verificationCode', code_expiration = '$expirationDate' WHERE email = '$email'";
                 $result_update_code = mysqli_query($con, $query_update_code);
@@ -620,6 +668,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "message" => "Internal Server Error: Unable to store verification code.",
                         "error" => mysqli_error($con)
                     ]);
+                    mysqli_close($con); // Close before exiting
                     exit;
                 }
 
@@ -651,6 +700,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         "message" => "Could not send verification email. Please try again later.",
                         "error" => $mail->ErrorInfo
                     ]);
+                    mysqli_close($con); // Close before exiting
                     exit;
                 }
 
@@ -659,6 +709,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode([
                     "message" => "Verification email sent successfully."
                 ]);
+                mysqli_close($con); // Close before exiting
                 exit;
             }
         } 
@@ -667,5 +718,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 http_response_code(405); // Invalid method
                 echo json_encode(["message" => "Invalid request method."]);
             }
-        
+
 ?>

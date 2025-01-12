@@ -4,6 +4,9 @@ session_start();
 ob_start();
 include('../includes/connect.php');
 $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
+
+
+
 ?>
 
 <!DOCTYPE html>

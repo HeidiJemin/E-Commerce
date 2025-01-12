@@ -47,8 +47,7 @@ if (empty($name) || empty($email) || empty($testimonial)) {
 }
 
 // Sanitize inputs for SQL
-$name = mysqli_real_escape_string($con, $name);
-$email = mysqli_real_escape_string($con, $email);
+
 $testimonial = mysqli_real_escape_string($con, $testimonial);
 $rating = mysqli_real_escape_string($con, $rating);
 $experienceDate = mysqli_real_escape_string($con, $experienceDate);
@@ -56,39 +55,54 @@ $satisfaction = mysqli_real_escape_string($con, $satisfaction);
 $recommend = mysqli_real_escape_string($con, $recommend);
 
 
+$user_id = intval($_SESSION['id']);  // Sanitize user_id
+$produkt_id = intval($produkt_id); 
 // Check if email already exists
-$checkQuery = "SELECT id FROM testimonials WHERE email = '$email'";
+$checkQuery = "SELECT * FROM testimonials WHERE user_id = $user_id AND produkt_id = $produkt_id";
+$checkOrderQuery = "SELECT oi.produkt_id 
+                    FROM order_items oi 
+                    JOIN orders o ON oi.order_id = o.id 
+                    WHERE oi.produkt_id = $produkt_id 
+                    AND o.user_id = $user_id";
+
+
 $checkResult = mysqli_query($con, $checkQuery);
 
 if ($checkResult && mysqli_num_rows($checkResult) > 0) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'A testimonial with this email already exists.']);
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'exists',
+        'success' => false,
+        'message' => 'You have already submitted a testimonial for this product.'
+    ]);
+    mysqli_close($con);
     exit;
 }
-$image_url = ""; 
-$query_image = "SELECT foto FROM users WHERE email = '$email'";
-$result_image = mysqli_query($con, $query_image); 
 
-if ($result_image && mysqli_num_rows($result_image) > 0) { 
-    $row_image = mysqli_fetch_assoc($result_image);
-    $image_url = isset($row_image['foto']) && !empty($row_image['foto']) 
-        ? $row_image['foto'] 
-        : 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg'; 
-} else {
-    // Default image URL if the query fails or no result is found
-    $image_url = 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
+$query_order_result = mysqli_query($con, $checkOrderQuery); 
+
+if(mysqli_num_rows($query_order_result)==0){ 
+    http_response_code(200);
+    echo json_encode([
+        'status' => 'exists',
+        'success' => false,
+        'message' => 'You cannot make a review. You did not buy yet !'
+    ]);
+    mysqli_close($con);
+    exit;
 }
+
 
 
 // Insert the testimonial
-$query = "INSERT INTO testimonials (name, email, testimonial, rating, experience_date, satisfaction, recommend, produkt_id,consent,image_url)
-          VALUES ('$name', '$email', '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id,$consent,'$image_url')";
+$query = "INSERT INTO testimonials (user_id,  testimonial, rating, experience_date, satisfaction, recommend, produkt_id,consent)
+          VALUES ($user_id, '$testimonial', $rating, '$experienceDate', '$satisfaction', '$recommend', $produkt_id,$consent)";
 
 // Debug: Log the query
 error_log("SQL Query: $query");
 
 if (mysqli_query($con, $query)) {
-    http_response_code(200);
+    http_response_code(response_code: 200);
     echo json_encode([
         'status' => 'success',
         'success' => true,
@@ -110,4 +124,7 @@ if (mysqli_query($con, $query)) {
             echo json_encode(["message" => "Invalid request method."]);
         }
 
-        ?>
+        mysqli_close($con);
+
+
+?>

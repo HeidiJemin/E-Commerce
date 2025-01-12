@@ -332,7 +332,7 @@ label {
 
   /* Styling for each card */
   .card {
-    background-color: #ffeb3b; /* Yellow background for cards */
+    background-color: #f8f9fa; /* Yellow background for cards */
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Darker shadow to match the black background */
     padding: 20px;
@@ -342,6 +342,7 @@ label {
     border: 2px solid white;
     margin: 10px;
   }
+
 
   /* Hover effect for the cards */
   .card:hover {

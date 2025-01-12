@@ -49,7 +49,7 @@
     // Validate first name
     if (!nameRegex.test(name)) {
         $("#name").addClass("error");
-        $("#nameError").text("Emri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        $("#nameError").text("Emri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.No numbers!");
         error++;
     } else {
         $("#name").removeClass("error");
@@ -59,7 +59,7 @@
     // Validate surname
     if (!nameRegex.test(surname)) {
         $("#surname").addClass("error");
-        $("#surnameError").text("Mbiemri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        $("#surnameError").text("Mbiemri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.No numbers!");
         error++;
     } else {
         $("#surname").removeClass("error");

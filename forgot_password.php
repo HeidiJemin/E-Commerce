@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $.ajax({
     type: "POST",
     url: "ajaxpass.php",
+    
     data: { action: "resetPassword", email: email },
     success: function (response) {
         try {

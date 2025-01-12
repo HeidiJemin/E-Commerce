@@ -8,6 +8,10 @@ if (!$con) {
     die("Error: " . mysqli_connect_error());
 }
 
+if(!isset($_SESSION['id'])){ 
+    header("location:index.php"); 
+}
+
 $name = ""; // Default value for name
 $email = ""; // Default value for email
 $produkt_id = isset($_GET['produkt_id']) ? intval($_GET['produkt_id']) : 0; // Get produkt_id from URL
@@ -33,6 +37,17 @@ if (isset($_SESSION["id"])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Toastr CSS -->
+<!-- Include jQuery (required for toastr and your script) -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- Include Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<!-- Include Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Testimonial</title>
@@ -136,7 +151,7 @@ if (isset($_SESSION["id"])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-    $(document).ready(function () {
+  $(document).ready(function () {
     // Handle star rating
     $('.rating .fa-star').on('click', function () {
         let rating = $(this).data('value');
@@ -203,42 +218,45 @@ if (isset($_SESSION["id"])) {
         data.append("satisfaction", $('input[name="satisfaction"]:checked').val());
         data.append("recommend", $('input[name="recommend"]:checked').val());
         data.append("consent", $('input[name="consent"]:checked').val());
+        data.append("produkt_id", parseInt($('#produkt_id').val()));
 
-        // AJAX call to backend (ajax.php)
+        // AJAX call to backend
         $.ajax({
-    type: "POST",
-    url: "ajaxtestimonial.php",
-    data: data,
-    processData: false,
-    contentType: false,
-    cache: false,
-    success: function (response) {
-        try {
-            response = JSON.parse(response); // Parse JSON response
-            if (response.status === 'success') {
-                alert(response.message); // Show success message
+            type: "POST",
+            url: "ajaxtestimonial.php",
+            data: data,
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
 
-                // Redirect to the URL provided in the response
-                if (response.redirect) {
-                    window.location.href = response.redirect;
+                    if (response.status === 'success') {
+                        toastr.success(response.message, "Success");
+                        if (response.redirect) {
+                            setTimeout(() => {
+                                window.location.href = response.redirect; // Redirect to thank_you.php
+                            }, 2000); // Optional: Add a small delay
+                        }
+                    } else if (response.status === 'exists') {
+                        toastr.warning(response.message, "Cannot make");
+                    } else {
+                        toastr.error(response.message || "An unknown error occurred.", "Error");
+                    }
+                } catch (e) {
+                    console.error("Error parsing JSON response:", e);
+                    toastr.error("Unexpected error occurred.", "Error");
                 }
-            } else {
-                alert(response.message); // Show error message
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", error);
+                toastr.error("A network error occurred. Please try again.", "Network Error");
             }
-        } catch (e) {
-            console.error("Error parsing JSON response:", e);
-            alert("Error parsing the response. Please try again.");
-        }
-    },
-    error: function (xhr, status, error) {
-        console.error("AJAX Error:", error);
-        alert("An error occurred while submitting your testimonial. Please try again.");
-    }
-});
-
-
+        });
     });
 });
+
 </script>
 
 </body>

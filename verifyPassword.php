@@ -8,6 +8,11 @@ if (!isset($_SESSION['email'])) {
     exit;
 }
 
+if(isset($_SESSION['id'])){
+    header("location:profile.php");
+}
+
+
 $email = mysqli_real_escape_string($con, trim($_SESSION['email']));
 $query_get_verificationcode = "SELECT verification_code, username FROM users WHERE email = '$email'";
 $result_get_verificationcode = mysqli_query($con, $query_get_verificationcode);
@@ -90,6 +95,15 @@ if (!$username || !$verification_code) {
                 $("#PasswordError").text("Password must be at least 4 characters.");
                 hasError = true;
             }
+
+            var passwordRegex =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/ ;
+          
+            if (!passwordRegex.test(password)) {
+            $("#PasswordError").text("Password duhet të ketë min 8 karaktere, një shkronjë të madhe, një të vogël, një numër dhe një simbol.");
+            hasError = true ; 
+            }  
+
+          
 
             // Check if passwords match
             if (password !== confirmPassword) {

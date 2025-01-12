@@ -496,17 +496,52 @@ function getekip(){
                 </p>";
 
             // Fetch testimonials for the product
-            $testimonial_query = "SELECT * FROM testimonials WHERE produkt_id = $produkt_id ORDER BY id DESC";
+            $testimonial_query = "SELECT name, foto, testimonial,rating,satisfaction 
+            FROM testimonials 
+            LEFT JOIN users ON users.user_id = testimonials.user_id 
+            WHERE produkt_id = $produkt_id 
+            ORDER BY id DESC";
+
             $testimonial_result = mysqli_query($con, $testimonial_query);
 
             if (mysqli_num_rows($testimonial_result) > 0) {
                 echo "<div class='testimonials'>";
                 while ($testimonial = mysqli_fetch_assoc($testimonial_result)) {
                   
-                    $image_url = $testimonial['image_url'] ?: 'https://via.placeholder.com/100';
+                    // Image and text data
+                    $image_url = $testimonial['foto'] ?: 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
                     $name = htmlspecialchars($testimonial['name']);
                     $quote = htmlspecialchars($testimonial['testimonial']);
-
+                    $rating = (int)$testimonial['rating']; // Convert to integer
+                    $satisfaction = isset($testimonial['satisfaction']) ? (int)$testimonial['satisfaction'] : 0;
+            
+                    // Generate star icons based on rating
+                    $stars = str_repeat('⭐', $rating);
+            
+                    // Choose emoji based on satisfaction level
+                    $emoji = '';
+                    switch ($satisfaction) {
+                        case 1:
+                            $emoji = '😢'; // Very Unsatisfied
+                            break;
+                        case 2:
+                            $emoji = '🙁'; // Unsatisfied
+                            break;
+                        case 3:
+                            $emoji = '😐'; // Neutral
+                            break;
+                        case 4:
+                            $emoji = '🙂'; // Satisfied
+                            break;
+                        case 5:
+                            $emoji = '😊'; // Very Satisfied
+                            break;
+                        default:
+                            $emoji = '🤔'; // Unknown satisfaction level
+                            break;
+                    }
+            
+                    // Output the testimonial card
                     echo "
                     <div class='card'>
                         <div class='image-container'>
@@ -514,13 +549,15 @@ function getekip(){
                         </div>
                         <h3>$name</h3>
                         <p class='quote'>\"$quote\"</p>
+                        <p class='stars'>$stars</p>
+                        <p class='emoji'>$emoji</p>
                     </div>";
                 }
                 echo "</div>";
             } else {
                 echo "<p>No testimonials available for this product yet.</p>";
             }
-
+            
             echo "</div>"; 
 
 

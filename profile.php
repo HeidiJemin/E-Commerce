@@ -291,9 +291,9 @@ function updatePassword() {
     }
 
     // Validate new password
-    var passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; // At least one lowercase, one uppercase, one digit, one special character, and 8+ characters
     if (!passwordRegex.test(newPassword)) {
-        $("#newPasswordError").text("Password must be at least 8 characters long, include at least one letter and one number.");
+        $("#newPasswordError").text("At least one lowercase, one uppercase, one digit, one special character, and 8+ characters");
         error = true;
     }
 

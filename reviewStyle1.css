@@ -67,4 +67,8 @@
     font-size: 0.9em;
   }
 
-  
+  .stars {
+    font-size: 20px;
+    color: black; /* Black color for stars */
+}
+

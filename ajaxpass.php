@@ -13,8 +13,8 @@ require './libraries/phpmailer/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$GMAIL_ADDRESS = 'grupiweb@gmail.com';
-$GMAIL_ADDRESS_PASSWORD = 'amly jexm cjfv amez';
+$GMAIL_ADDRESS = 'trendytrend2803@gmail.com';
+$GMAIL_ADDRESS_PASSWORD = 'iwsc jlrv aoyc dbpa';
 
 if($_POST['action'] === 'resetPassword') {
     $email = mysqli_real_escape_string($con, $_POST['email']);
@@ -27,6 +27,7 @@ if($_POST['action'] === 'resetPassword') {
             "tagError" => "emailError",
             "tagElement" => "email"
         ]);
+        mysqli_close($con); 
         exit;
     }
 
@@ -40,12 +41,14 @@ if($_POST['action'] === 'resetPassword') {
             "message" => "Internal Server Error",
             "error" => mysqli_error($con)
         ]);
+        mysqli_close($con); 
         exit;
     }
 
     if (mysqli_num_rows($current_email_result) == 0) {
         http_response_code(203);
         echo json_encode(["message" => "No user found with this email."]);
+        mysqli_close($con); 
         exit;
     }
 
@@ -63,6 +66,7 @@ if($_POST['action'] === 'resetPassword') {
             "message" => "Internal Server Error: Unable to store verification code.",
             "error" => mysqli_error($con)
         ]);
+        mysqli_close($con); 
         exit;
     }
 
@@ -96,6 +100,7 @@ if($_POST['action'] === 'resetPassword') {
             "message" => "Could not send verification email. Please try again later.",
             "error" => $mail->ErrorInfo
         ]);
+        mysqli_close($con); 
         exit;
     }
 
@@ -105,7 +110,7 @@ if($_POST['action'] === 'resetPassword') {
         'status' => 'success',
         "message" => "Verification email sent successfully."
     ]);
-    
+    mysqli_close($con); 
     exit;
 }elseif ($_POST["action"] === 'changePassword') { 
 
@@ -115,6 +120,7 @@ if($_POST['action'] === 'resetPassword') {
             'success' => false,
             'message' => 'Session expired. Try again.'
         ]);
+        mysqli_close($con); 
         exit;
     }
 
@@ -125,16 +131,17 @@ if($_POST['action'] === 'resetPassword') {
     $confirmPassword = mysqli_real_escape_string($con, $_POST['confirmPassword']);
 
     // Define a password validation regex
-    $passwordRegex = "/^[a-zA-Z0-9-_ ]{4,}$/"; // Password must be at least 4 characters, alphanumeric, with optional special chars
+    $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/"; // Password must be at least 4 characters, alphanumeric, with optional special chars
 
     // Validate the new password
     if (!preg_match($passwordRegex, $newPassword)) {
         http_response_code(203);
         echo json_encode([
-            "message" => "Password must be at least 4 characters long.",
+            'message' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
             "tagError" => "passwordError",
             "tagElement" => "password"
         ]);
+        mysqli_close($con);
         exit;
     }
 
@@ -146,6 +153,7 @@ if($_POST['action'] === 'resetPassword') {
             "tagError" => "confirmPasswordError",
             "tagElement" => "confirmPassword"
         ]);
+        mysqli_close($con); // Close DB connection
         exit;
     }
 
@@ -160,6 +168,7 @@ if($_POST['action'] === 'resetPassword') {
             'message' => 'Failed to verify the verification code. Please try again.',
             'error' => mysqli_error($con) // For debugging, remove in production
         ]);
+        mysqli_close($con);
         exit;
     }
 
@@ -170,6 +179,7 @@ if($_POST['action'] === 'resetPassword') {
             'success' => false,
             'message' => 'Invalid verification code. Please try again.'
         ]);
+        mysqli_close($con);
         exit;
     }
 
@@ -195,6 +205,7 @@ if($_POST['action'] === 'resetPassword') {
             'error' => mysqli_error($con) // For debugging, remove in production
         ]);
     }
+    mysqli_close($con);
     exit;
 }
     ?>
