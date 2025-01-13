@@ -10,12 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
 
     try {
        
-        $delete_items_query = "DELETE FROM order_items WHERE order_id = $order_id";
-        if (mysqli_query($con, $delete_items_query) === false) {
-            throw new Exception("Failed to delete order items.");
-        }
-
-       
+        
         $delete_order_query = "DELETE FROM orders WHERE id = $order_id";
         if (mysqli_query($con, $delete_order_query) === false) {
             throw new Exception("Failed to delete the order.");

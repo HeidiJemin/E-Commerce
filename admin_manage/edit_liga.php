@@ -18,7 +18,8 @@ if(isset($_POST['edit_liga'])){
         echo "<script> alert('Liga u perditesua me sukses)</script>";
         echo "<script>window.open('./index.php?shiko_liga','_self')</script>";
     }
-}   
+} 
+mysqli_close($con);  
 ?>
 
 <div class="container mt-3">
@@ -28,6 +29,6 @@ if(isset($_POST['edit_liga'])){
             <label for="liga_name" class="form-label">Liga Name</label>
             <input type="text" name="liga_name" id="liga_name" class="form-control" value="<?php echo $liga_name;?>" required="required">
         </div>
-        <input type="submit" value="Update Liga" class="btn btn-info px-3 mb-3" name="edit_liga">
+        <input type="submit" value="Update Liga" class="btn px-3 mb-3" style="background-color: #ffce00; border-color: #ffce00;" name="edit_liga">
     </form>
 </div>

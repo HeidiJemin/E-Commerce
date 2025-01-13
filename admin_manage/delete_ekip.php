@@ -1,14 +1,20 @@
 <?php
-include('../includes/connect.php');
+include_once('../user/includes/connect.php');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ekip_id'])) {
-    $ekip_id = intval($_POST['ekip_id']);
-    $query = "DELETE FROM `ekip` WHERE `ekip_id` = $ekip_id";
-    if (mysqli_query($con, $query)) {
-        echo "Ekip deleted successfully.";
+if (isset($_POST['ekip_id'])) {
+    $ekip_id = $_POST['ekip_id'];
+
+    
+
+    // SQL query to delete the 'ekip'
+    $delete_query = "DELETE FROM `ekip` WHERE `ekip_id` = $ekip_id";
+    $result = mysqli_query($con, $delete_query);
+
+    // Return JSON response
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => 'Ekip deleted successfully!']);
     } else {
-        http_response_code(500);
-        echo "Failed to delete ekip.";
+        echo json_encode(['success' => false, 'message' => 'Error deleting the ekip.']);
     }
 }
 mysqli_close($con);

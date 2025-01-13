@@ -3,11 +3,11 @@
 <table id="ekipTable" class="table table-bordered mt-5 display">
   <thead class="bg-info">
     <tr>
-      <th>Ekip.NO</th>
-      <th>Ekip Name</th>
-      <th>Ekip Liga</th>
-      <th>Edit</th>
-      <th>Delete</th>
+      <th class="text-center">Ekip.NO</th>
+      <th class="text-center">Ekip Name</th>
+      <th class="text-center">Ekip Liga</th>
+      <th class="text-center">Edit</th>
+      <th class="text-center">Delete</th>
     </tr>
   </thead>
   <tbody class="bg-secondary text-light">
@@ -28,22 +28,27 @@
         $liga_name = $row['liga_name']; // Fetch the liga name
         $number++;
     ?>
-      <tr>
-        <td><?php echo $number; ?></td>
-        <td><?php echo $ekip_name; ?></td>
-        <td><?php echo $liga_name; ?></td> <!-- Display liga name -->
-        <td><a href="index.php?edit_ekip=<?php echo $ekip_id ?>"><i class="fa-solid fa-pen-to-square"></i></a></td>
-        <td>
+      <tr id="ekip-<?php echo $ekip_id; ?>">
+        <td class="text-center"><?php echo $number; ?></td>
+        <td class="text-center"><?php echo $ekip_name; ?></td>
+        <td class="text-center"><?php echo $liga_name; ?></td> <!-- Display liga name -->
+        <td class="text-center">
+          <a href="index.php?edit_ekip=<?php echo $ekip_id ?>" class="btn btn-warning btn-sm">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+        </td>
+        <td class="text-center">
           <button 
             class="btn btn-danger btn-sm delete-btn" 
             data-id="<?php echo $ekip_id; ?>" 
             data-name="<?php echo $ekip_name; ?>">
-            <i class="fa-solid fa-trash"></i>
+            <i class="fa-solid fa-trash"></i> Delete
           </button>
         </td>
       </tr>
     <?php
     }
+    mysqli_close($con);
     ?>
   </tbody>
 </table>
@@ -70,8 +75,8 @@
 <!-- Initialize DataTable and Modal Logic -->
 <script>
   $(document).ready(function () {
-    // Initialize DataTable
-    $('#ekipTable').DataTable({
+    // Initialize DataTable with empty state handling
+    var table = $('#ekipTable').DataTable({
       paging: true,
       searching: true,
       info: true,
@@ -83,7 +88,9 @@
           last: "Last",
           next: "Next",
           previous: "Previous"
-        }
+        },
+        infoEmpty: "No Ekip available", // Custom message when no data is available
+        zeroRecords: "No records match your search", // Custom message when no records match search
       }
     });
 
@@ -100,16 +107,59 @@
     $("#confirmDelete").on("click", function () {
       const ekipId = $(this).data("id");
       $.ajax({
-        url: "delete_ekip.php",
+        url: "delete_ekip.php",  // PHP file to handle deletion
         type: "POST",
         data: { ekip_id: ekipId },
         success: function (response) {
-          alert("Ekip deleted successfully!");
-          $("#deleteModal").modal("hide");
-          location.reload();
+          try {
+            const data = JSON.parse(response); // Parse the response to JSON
+
+            if (data.success) {
+              // Show success toast
+              const toast = document.createElement('div');
+              toast.style.position = 'fixed';
+              toast.style.bottom = '20px';
+              toast.style.right = '20px';
+              toast.style.backgroundColor = '#28a745';
+              toast.style.color = '#fff';
+              toast.style.padding = '10px 20px';
+              toast.style.borderRadius = '5px';
+              toast.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.2)';
+              toast.textContent = data.message;
+              document.body.appendChild(toast);
+
+              // Remove the toast after 3 seconds
+              setTimeout(() => toast.remove(), 3000);
+
+              // Remove the deleted row from the DataTable
+              table.row('#ekip-' + ekipId).remove().draw();
+            } else {
+              // Show error toast
+              const toast = document.createElement('div');
+              toast.style.position = 'fixed';
+              toast.style.bottom = '20px';
+              toast.style.right = '20px';
+              toast.style.backgroundColor = '#dc3545';
+              toast.style.color = '#fff';
+              toast.style.padding = '10px 20px';
+              toast.style.borderRadius = '5px';
+              toast.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.2)';
+              toast.textContent = data.message;
+              document.body.appendChild(toast);
+
+              // Remove the toast after 3 seconds
+              setTimeout(() => toast.remove(), 3000);
+            }
+          } catch (e) {
+            alert('Error: Invalid response from the server');
+          }
         },
         error: function () {
-          alert("An error occurred while deleting the ekip.");
+          alert('There was an error processing your request.');
+        },
+        complete: function () {
+          // Close the modal after the deletion
+          $('#deleteModal').modal('hide');
         }
       });
     });

@@ -15,8 +15,6 @@ $result = mysqli_query($con, $query);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-</head>
-<body>
     <style>
         table#userTable {
             border-collapse: collapse;
@@ -44,7 +42,10 @@ $result = mysqli_query($con, $query);
         table#userTable tbody tr:hover {
             background-color: #f5f5f5;
         }
-    </style>
+        </style>
+</head>
+<body>
+    
     <h2 class="text-center">All Users</h2>
     <table id="userTable" class="display">
         <thead>
@@ -60,42 +61,52 @@ $result = mysqli_query($con, $query);
             </tr>
         </thead>
         <tbody>
-            <?php
-            if (mysqli_num_rows($result) > 0) {
-                $no = 1;
-                while ($row = mysqli_fetch_assoc($result)) {
-                    ?>
-                    <tr>
-                        <td><?php echo $no++; ?></td>
-                        <td><?php echo htmlspecialchars($row['username']); ?></td>
-                        <td><?php echo htmlspecialchars($row['name']); ?></td>
-                        <td><?php echo htmlspecialchars($row['surname']); ?></td>
-                        <td><img src="../<?php echo htmlspecialchars($row['foto']); ?>" alt="User Photo"></td>
-                        <td><?php echo htmlspecialchars($row['email']); ?></td>
-                        <td>
-                            <button 
-                                class="btn btn-primary btn-sm edit-btn" 
-                                data-id="<?php echo $row['user_id']; ?>" 
-                                data-username="<?php echo htmlspecialchars($row['username']); ?>" 
-                                data-name="<?php echo htmlspecialchars($row['name']); ?>" 
-                                data-surname="<?php echo htmlspecialchars($row['surname']); ?>" 
-                                data-email="<?php echo htmlspecialchars($row['email']); ?>">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn btn-danger btn-sm delete-btn" data-id="<?php echo $row['user_id']; ?>">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php
-                }
-            } else {
-                echo "<tr><td colspan='8' class='text-center'>No users found</td></tr>";
-            }
+    <?php
+    if (mysqli_num_rows($result) > 0) {
+        $no = 1;
+        while ($row = mysqli_fetch_assoc($result)) {
             ?>
-        </tbody>
+            <tr>
+                <td><?php echo $no++; ?></td>
+                <td><?php echo htmlspecialchars($row['username']); ?></td>
+                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                <td><?php echo htmlspecialchars($row['surname']); ?></td>
+                <td>
+                    <?php 
+                    // Check if the 'foto' field is empty or not
+                    if (empty($row['foto'])) {
+                        echo "No Photo"; // Display "No Photo" if no photo exists
+                    } else {
+                        echo '<img src="../user/' . htmlspecialchars($row['foto']) . '" alt="User Photo">';
+                    }
+                    ?>
+                </td>
+                <td><?php echo htmlspecialchars($row['email']); ?></td>
+                <td>
+                    <button 
+                        class="btn btn-primary btn-sm edit-btn" 
+                        data-id="<?php echo $row['user_id']; ?>" 
+                        data-username="<?php echo htmlspecialchars($row['username']); ?>" 
+                        data-name="<?php echo htmlspecialchars($row['name']); ?>" 
+                        data-surname="<?php echo htmlspecialchars($row['surname']); ?>" 
+                        data-email="<?php echo htmlspecialchars($row['email']); ?>">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="<?php echo $row['user_id']; ?>">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            <?php
+        }
+    } else {
+        echo "<tr><td colspan='8' class='text-center'>No users found</td></tr>";
+    }
+    mysqli_close($con);
+    ?>
+</tbody>
     </table>
 
     <!-- Edit Modal -->
@@ -190,22 +201,29 @@ $result = mysqli_query($con, $query);
             $("#deleteModal").modal("show");
         });
 
-        // Confirm deletion
-        $("#confirmDelete").on("click", function () {
-            const userId = $(this).data("id");
-            $.ajax({
-                url: "delete_user.php",
-                type: "POST",
-                data: { user_id: userId },
-                success: function (response) {
-                    alert(response);
-                    location.reload();
-                },
-                error: function () {
-                    alert("An error occurred while deleting the user.");
-                }
-            });
-        });
+       // Confirm deletion
+$("#confirmDelete").on("click", function () {
+    const userId = $(this).data("id");
+    $.ajax({
+        url: "delete_user.php",  // PHP file to handle deletion
+        type: "POST",
+        data: { user_id: userId },
+        success: function (response) {
+            const data = JSON.parse(response); // Parse the JSON response
+            if (data.status === "success") {
+                // Find the row to delete and remove it from the DataTable
+                $('#userTable').DataTable().row($(`button[data-id="${userId}"]`).closest('tr')).remove().draw();
+                $("#deleteModal").modal("hide"); // Close the delete modal
+                toastr.success(data.message); // Show success message using Toastr
+            } else {
+                toastr.error(data.message); // Show error message using Toastr
+            }
+        },
+        error: function () {
+            toastr.error("An error occurred while processing the request."); // Show error notification if AJAX fails
+        }
+    });
+});
 
         // Clear errors when closing modals
         $(document).on("click", "[data-bs-dismiss=modal]", function () {
@@ -266,5 +284,4 @@ $result = mysqli_query($con, $query);
 
 </body>
 </html>
-<?php
-mysqli_close($con);
+

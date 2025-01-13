@@ -1,4 +1,31 @@
 <?php
+
+// Start the session and include necessary files
+session_start();
+ob_start();
+include('../includes/connect.php');
+
+// Check if the user is logged in
+if (!isset($_SESSION['id'])) {
+    // Redirect to the login page if not logged in
+    header("Location: ../login.php");
+    exit;
+}
+
+// Ensure the user has admin privileges
+if ((int)$_SESSION['role_id'] !== 0) {
+    // Redirect unauthorized users to the home page or another appropriate page
+    header("Location: ../index.php");
+    exit;
+}
+
+// Optional: Log the current user details for auditing or debugging (remove in production)
+$username = $_SESSION['username'];
+$userId = $_SESSION['id'];
+
+// Example logging (optional, for debugging)
+// error_log("Admin Access: User ID: $userId, Username: $username");
+
 include('../includes/connect.php');
 
 if (isset($_POST['shto_produkt'])) {
@@ -54,7 +81,11 @@ if (isset($_POST['shto_produkt'])) {
         }
 
         if ($result_query) {
-            echo "<script>alert('Produkti u shtua me sukses!')</script>";
+            echo "<script>
+                alert('Produkti u shtua me sukses!');
+                window.location.href = 'index.php';
+            </script>";
+            exit(); // Ensure no further code is executed
         }
     }
 }
@@ -68,6 +99,7 @@ if (isset($_POST['shto_produkt'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shto Produkte - Admin</title>
+    <link rel="stylesheet" href="./admin_style.css">
     <!-- bootstrap CSS link -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <!-- font awesome link -->
@@ -75,6 +107,28 @@ if (isset($_POST['shto_produkt'])) {
 </head>
 
 <body class="bg-light">
+<div class="container-fluid p-0">
+    <nav class="navbar navbar-expand-lg" style="background-color: #000; color: #fff;">
+    <div class="container-fluid">
+        <img src="../images/logo.png" class="logo" alt="Logo">
+        <nav class="navbar navbar-expand-lg">
+            <ul class="navbar-nav">
+                <!-- Home Button -->
+                <li class="nav-item">
+                    <a href="./index.php" class="nav-link" style="color: #fff;">
+                        Home
+                    </a>
+                </li>
+                <!-- Welcome Message -->
+                <li class="nav-item">
+                    <a href="" class="nav-link" style="color: #fff;">
+                        Welcome <?php echo htmlspecialchars($username); ?>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</nav>
 <div class="container mt-4">
     <h1 class="text-center mb-4">Shto Produkt</h1>
     <form action="" method="POST" enctype="multipart/form-data">
@@ -142,17 +196,18 @@ if (isset($_POST['shto_produkt'])) {
 
                 <h5 class="mt-4">Stoku per Masat</h5>
                 <div class="row">
-                    <?php
-                    $sizes = ['Small', 'Medium', 'Large', 'XL', 'XXL'];
-                    foreach ($sizes as $size) {
-                        echo "
-                        <div class='col-md-4'>
-                            <label class='form-label'>$size</label>
-                            <input type='number' class='form-control' name='stock_" . strtolower($size) . "' placeholder='Sasia' required>
-                        </div>";
-                    }
-                    ?>
-                </div>
+    <?php
+    $sizes = ['Small', 'Medium', 'Large', 'XL', 'XXL'];
+    foreach ($sizes as $size) {
+        echo "
+        <div class='col-md-4'>
+            <label class='form-label'>$size</label>
+            <input type='number' class='form-control stock-input' name='stock_" . strtolower($size) . "' placeholder='Sasia' required min='0'>
+        </div>";
+    }
+    ?>
+</div>
+
             </div>
         </div>
 
@@ -162,12 +217,12 @@ if (isset($_POST['shto_produkt'])) {
            class="btn" 
            name="shto_produkt" 
            value="Shto Produktin" 
-           style="background-color: black; color: white; border: 1px solid black;" 
+           style="background-color: black; color: white; border: 1px solid black;margin: 10px;" 
            onmouseover="this.style.color='#ffce00'; this.style.borderColor='#ffce00';" 
            onmouseout="this.style.color='white'; this.style.borderColor='black';">
 </div>
 
-
+</div>
     </form>
 </div>
 <script>
@@ -191,8 +246,23 @@ if (isset($_POST['shto_produkt'])) {
             .catch(error => console.error('Error:', error));
         }
     });
+    
+    
+    document.querySelectorAll('.stock-input').forEach(input => {
+        input.addEventListener('input', function () {
+            if (this.value < 0) {
+                this.value = 0; // Reset the value to 0 if negative
+            }
+        });
+    });
+
+
 </script>
 
 </body>
 
 </html>
+<?php
+
+mysqli_close($con);
+?>

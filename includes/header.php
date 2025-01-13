@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bg-black custom-absolute-top">
   <div class="container-fluid">
-    <img src="./images/logo.png" alt="" class="logo">
+    <img src="../admin_manage/produkt_image/logo.png" alt="" class="logo">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -23,6 +23,9 @@
           <a class="nav-link" href="#">Contact</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="./favourites.php">Favourites</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="my_orders.php">My Orders</a>
         </li>
         <li class="nav-item">
@@ -30,7 +33,7 @@
           // Check if the user is logged in before displaying the cart link
           if (isset($_SESSION['id'])) {
               // User is logged in, allow access to cart.php
-              echo '<a class="nav-link" href="cart.php"><i class="fa-solid fa-cart-shopping"><sup>' . getCartProductNumber() . '</sup></i></a>';
+              echo '<a class="nav-link" href="cart.php"><i class="fa-solid fa-cart-shopping"><sup id="cart-count">' . getCartProductNumber() . '</sup></i></a>';
           } else {
               // User is not logged in, redirect to login.php
               echo '<a class="nav-link" href="cart.php"><i class="fa-solid fa-cart-shopping"><sup>' . getCartProductNumber() . '</sup></i></a>';

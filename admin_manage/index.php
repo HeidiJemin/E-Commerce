@@ -1,9 +1,31 @@
+
 <?php
 // Start the session and include necessary files
 session_start();
 ob_start();
 include('../includes/connect.php');
-$username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
+
+// Check if the user is logged in
+if (!isset($_SESSION['id'])) {
+    // Redirect to the login page if not logged in
+    header("Location: ../login.php");
+    exit;
+}
+
+// Ensure the user has admin privileges
+if ((int)$_SESSION['role_id'] !== 0) {
+    // Redirect unauthorized users to the home page or another appropriate page
+    header("Location: ../index.php");
+    exit;
+}
+
+// Optional: Log the current user details for auditing or debugging (remove in production)
+$username = $_SESSION['username'];
+$userId = $_SESSION['id'];
+
+// Example logging (optional, for debugging)
+// error_log("Admin Access: User ID: $userId, Username: $username");
+
 ?>
 
 <!DOCTYPE html>
@@ -135,7 +157,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
             <a href="index.php?shiko_porosi" class="custom-btn nav-link">
                 POROSITE
             </a>
-            <a href="#" class="custom-btn nav-link">
+            <a href="index.php?shiko_pagesa" class="custom-btn nav-link">
                 PAGESAT
             </a>
             <a href="index.php?shiko_user" class="custom-btn nav-link">
@@ -163,9 +185,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
             if (isset($_GET['edit_produkt'])) {
                 include('edit_produkt.php');
             }
-            if (isset($_GET['delete_produkt'])) {
-                include('delete_produkt.php');
-            }
+            
             if (isset($_GET['shiko_liga'])) {
                 include('shiko_liga.php');
             }
@@ -186,6 +206,9 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
             }
             if (isset($_GET['shiko_porosi'])) {
                 include('shiko_porosi.php');
+            }
+            if (isset($_GET['shiko_pagesa'])) {
+                include('shiko_pagesa.php');
             }
             ?>
         </div>
@@ -222,6 +245,23 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
                 }
             });
         }
+        function previewImage(imageNumber) {
+    var fileInput = document.getElementById('produkt_image' + imageNumber);
+    var file = fileInput.files[0];
+    var preview = document.getElementById('preview_image' + imageNumber);
+
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result; // Update image preview
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // If no file is selected, keep the default image
+        preview.src = './produkt_image/<?php echo $product_image1; ?>';
+    }
+}
     </script>
+    
 </body>
 </html>

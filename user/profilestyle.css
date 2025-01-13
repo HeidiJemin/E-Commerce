@@ -1,0 +1,109 @@
+@import url("https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap");
+
+body {
+  background: #ffce00;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #ffce00;
+}
+
+.profile-button {
+  background: #ffce00;
+  box-shadow: none;
+  border: none;
+  color: black;
+}
+
+.profile-button:hover {
+  background: black;
+}
+
+.profile-button:focus {
+  background: #ffce00;
+  box-shadow: none;
+}
+
+.profile-button:active {
+  background: #ffce00;
+  box-shadow: none;
+}
+
+.back:hover {
+  color: #ffce00;
+  cursor: pointer;
+}
+
+.labels {
+  font-size: 11px;
+}
+
+.add-experience:hover {
+  background: #ffce00;
+  color: #fff;
+  cursor: pointer;
+  border: solid 1px #ffce00;
+}
+
+.error {
+  border: 2px solid #dc3545 !important;
+  box-shadow: 0 0 5px #dc3545 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+.logo {
+  width: 7%;
+  height: 7%;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+}
+
+.admin_image {
+  width: 100px;
+  object-fit: contain;
+}
+
+.cart-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important; /* White text for navbar links */
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important; /* Hover color for navbar links */
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important; /* Active link color */
+}
+
+/* Toggler icon color */
+.navbar-toggler-icon {
+  background-color: white; /* White icon color */
+}
+/* Search form button */
+form .btn-outline-light {
+  border-color: #fff !important;
+  color: white !important;
+}
+
+form .btn-outline-light:hover {
+  background-color: #ffce00;
+  color: white !important;
+}

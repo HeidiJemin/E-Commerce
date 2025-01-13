@@ -11,13 +11,15 @@ if (isset($_POST['shto_ekip'])) {
     $number = mysqli_num_rows($result_select);
 
     if ($number > 0) {
-        echo "<script>alert('Ekipi ekziston aktualisht');</script>";
+        echo "<script>toastr.error('Ekipi ekziston aktualisht');</script>";
     } else {
         // Insert new Ekip with Liga ID
         $insert_query = "INSERT INTO `ekip` (ekip_name, liga_id) VALUES ('$ekip_name', '$liga_id')";
         $result = mysqli_query($con, $insert_query);
         if ($result) {
-            echo "<script>alert('Ekipi u shtua me sukses');</script>";
+            echo "<script>toastr.success('Ekipi u shtua me sukses');</script>";
+        } else {
+            echo "<script>toastr.error('Ka ndodhur nje gabim, ju lutem provoni perseri');</script>";
         }
     }
 }
@@ -30,19 +32,17 @@ $liga_result = mysqli_query($con, $liga_query);
 <form action="" method="post" class="mb-2">
     <!-- Input field for Ekip -->
     <div class="input-group mb-2 w-90">
-        <span class="input-group-text bg-info" id="basic-addon1"><i class="fa-solid fa-receipt"></i></span>
+        <span class="input-group-text" style="background-color: #ffce00;" id="basic-addon1"><i class="fa-solid fa-receipt"></i></span>
         <input type="text" class="form-control" name="ekip_name" placeholder="Shto nje ekip" aria-label="ekip" aria-describedby="basic-addon1" required>
     </div>
 
     <!-- Select dropdown for Liga -->
     <div class="input-group mb-2 w-90">
-        <span class="input-group-text bg-info" id="basic-addon2"><i class="fa-solid fa-list"></i></span>
+        <span class="input-group-text" style="background-color: #ffce00;" id="basic-addon2"><i class="fa-solid fa-list"></i></span>
         <select name="liga_id" class="form-select" aria-label="Zgjidhni Ligën" required>
             <option value="" disabled selected>Zgjidhni Ligën</option>
             <?php
             // Populate Liga dropdown dynamically
-            $liga_query = "SELECT * FROM `liga`";
-            $liga_result = mysqli_query($con, $liga_query);
             while ($liga_row = mysqli_fetch_assoc($liga_result)) {
                 echo "<option value='{$liga_row['liga_id']}'>{$liga_row['liga_name']}</option>";
             }
@@ -52,6 +52,11 @@ $liga_result = mysqli_query($con, $liga_query);
 
     <!-- Submit Button -->
     <div class="d-flex justify-content-center align-items-center input-group mb-2 w-10 m-auto">
-        <input type="submit" class="bg-info text-white p-2 my-3 border-0" name="shto_ekip" value="Shto nje ekip">
+        <input type="submit" class="text-white p-2 my-3 border-0" name="shto_ekip" value="Shto nje ekip" style="background-color: #ffce00;">
     </div>
 </form>
+
+<?php
+
+mysqli_close($con);
+?>

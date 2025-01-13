@@ -9,16 +9,16 @@ function deleteUser($user_id) {
     // Ensure the connection is valid
     if (!$con) {
         http_response_code(500);
-        return "Database connection failed.";
+        return json_encode(["status" => "error", "message" => "Database connection failed."]);
     }
 
     $query = "DELETE FROM users WHERE user_id = $user_id";
 
     if (mysqli_query($con, $query)) {
-        return "User deleted successfully.";
+        return json_encode(["status" => "success", "message" => "User deleted successfully."]);
     } else {
         http_response_code(500);
-        return "Error deleting user.";
+        return json_encode(["status" => "error", "message" => "Error deleting user."]);
     }
 }
 
@@ -30,8 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     echo deleteUser($user_id);
 } else {
     http_response_code(400); // Bad request
-    echo "Invalid request.";
+    echo json_encode(["status" => "error", "message" => "Invalid request."]);
 }
 
 mysqli_close($con);
 ?>
+

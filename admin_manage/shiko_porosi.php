@@ -12,6 +12,7 @@
         <th>Items</th>
         <th>Status</th>
         <th>Created At</th>
+        <th>Delete</th> <!-- New Delete Column -->
       </tr>
     </thead>
     <tbody>
@@ -32,7 +33,9 @@
 
       $result = $con->query($query);
 
+      // Check if the query returns any rows
       if ($result->num_rows > 0) {
+        // Loop through rows and populate table
         while ($row = $result->fetch_assoc()) {
           echo "<tr>
                   <td class='text-center'>{$row['order_id']}</td>
@@ -47,21 +50,20 @@
           echo "</td>
                 <td class='text-center'>";
 
-          if ($row['status'] === 'PENDING') {
-            echo "<button class='btn btn-sm btn-danger delete-order' data-id='{$row['order_id']}'>
-                    Delete
-                  </button>";
-          } else {
-            echo "<span class='badge bg-success'>COMPLETED</span>";
-          }
-
+          echo ($row['status'] === 'PENDING') 
+            ? "<span class='badge bg-warning'>PENDING</span>" 
+            : "<span class='badge bg-success'>COMPLETED</span>";
           echo "</td>
                 <td class='text-center'>{$row['created_at']}</td>
+                <td class='text-center'>
+                  <button class='btn btn-sm btn-danger delete-order' data-id='{$row['order_id']}'>
+                    Delete
+                  </button>
+                </td>
               </tr>";
         }
-      } else {
-        echo "<tr><td colspan='7' class='text-center'>No orders found</td></tr>";
       }
+      mysqli_close($con);
       ?>
     </tbody>
   </table>
@@ -89,7 +91,8 @@
 <!-- Initialize DataTable -->
 <script>
   $(document).ready(function () {
-    $('#ordersTable').DataTable({
+    // Initialize DataTable with proper settings
+    var table = $('#ordersTable').DataTable({
       paging: true,
       searching: true,
       info: true,
@@ -105,9 +108,16 @@
           previous: "Previous"
         },
         info: "Showing _START_ to _END_ of _TOTAL_ orders",
-        infoEmpty: "No orders available"
+        infoEmpty: "No orders available", // Message when no data is available
+        zeroRecords: "No records match your search" // Custom message for no matching records
       }
     });
+
+    // Check if there are any rows, if not, avoid DataTables warning
+    if ($('#ordersTable tbody tr').length === 0) {
+      // No need to display "No orders found" as it's handled by DataTable itself
+      $('#ordersTable').DataTable().clear().draw();
+    }
 
     // Open the modal and set the Order ID to delete
     $('.delete-order').click(function () {
@@ -127,15 +137,16 @@
         success: function(response) {
           const data = JSON.parse(response);
           if (data.success) {
-            alert('Order deleted successfully!');
-            location.reload(); // Reload the page to update the table
+            toastr.success('Order deleted successfully!');
+            // Remove the row from the DataTable
+            table.row($(`button[data-id="${orderId}"]`).closest('tr')).remove().draw();
           } else {
-            alert('Failed to delete the order. Please try again.');
+            toastr.error('Failed to delete the order. Please try again.');
           }
           $('#deleteModal').modal('hide'); // Close the modal
         },
         error: function() {
-          alert('There was an error processing your request.');
+          toastr.error('There was an error processing your request.');
           $('#deleteModal').modal('hide'); // Close the modal in case of error
         }
       });
