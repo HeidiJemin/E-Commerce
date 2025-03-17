@@ -1,0 +1,147 @@
+@import url("https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap");
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+}
+
+.logo {
+  width: 7%;
+  height: 7%;
+}
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.admin_image {
+  width: 100px;
+  object-fit: contain;
+}
+
+.cart-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+
+.navbar .nav-link {
+  color: white !important;
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important;
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important;
+}
+
+.navbar-toggler-icon {
+  background-color: white;
+}
+
+form .btn-outline-light {
+  border-color: #fff !important;
+  color: white !important;
+}
+
+form .btn-outline-light:hover {
+  background-color: #ffce00;
+  color: white !important;
+}
+
+.produkt_img {
+  width: 90px;
+  object-fit: contain;
+}
+
+.navbar {
+  background-color: #000 !important;
+}
+
+.navbar .navbar-nav .nav-link {
+  color: #fff !important;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+  color: #ffce00 !important;
+}
+
+.button-nav {
+  background-color: #ffce00;
+  color: #000;
+}
+
+.button-nav .nav-link {
+  color: #000; /* Black text */
+}
+
+.button-nav .nav-link:hover {
+  color: #fff; /* White text on hover */
+  background-color: #000; /* Black background on hover */
+}
+
+/* Admin Options section */
+.admin-options {
+  background-color: #fff;
+  color: #000;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.admin-options button {
+  background-color: #ffce00; /* Yellow background */
+  color: #000; /* Black text */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  margin: 5px;
+}
+
+.admin-options button:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Table styles */
+#productTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#productTable th,
+#productTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#productTable tbody tr:hover {
+  background-color: #f1f1f1;
+}

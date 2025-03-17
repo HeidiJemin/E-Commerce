@@ -1,7 +1,12 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
+require_once('../includes/connect.php');
 
+if(isset($_SESSION['verified']) && $_SESSION['verified'] == 1){ 
+    header("location:./profile.php");
+}
+
+//
 if (!isset($_SESSION['email'])) {
     header("Location: ./login.php");
     exit;
@@ -24,10 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Email Verification</title>
-        <link rel="stylesheet" href="style_reg.css">
+        <link rel="stylesheet" href="./css/style_reg.css">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+        <script src="./js/inactivity.js" defer></script>
         <script>
             toastr.options = {
                 "closeButton": true,
@@ -48,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
 
             function verifyCode(event) {
-                event.preventDefault(); // Prevent form submission
+                event.preventDefault(); 
 
                 var verificationCode = $("#verificationCode").val();
 
@@ -56,10 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 data.append("action", "verifyCode");
                 data.append('verificationCode', verificationCode);
 
-                // AJAX call to the backend
+                
                 $.ajax({
                     type: "POST",
-                    url: "ajax.php",
+                    url: "./controllers/ajax.php",
                     async: false,
                     cache: false,
                     processData: false,
@@ -70,11 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         console.log(response);
 
                         if (call.status == 200) {
-                            toastr.success(response.message); // Use toastr for success message
-                            window.location.href = "./profile.php"; // Redirect to profile page
+                            toastr.success(response.message); 
+                            window.location.href = "./profile.php"; 
                         } else {
-                            toastr.error(response.message); // Use toastr for error message
-                            $("#responseMessage").text(response.message); // Display error message
+                            toastr.error(response.message); 
+                            $("#responseMessage").text(response.message); 
                         }
                     },
                     error: async function (e) {
@@ -87,10 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 var data = new FormData();
                 data.append("action", "resendVerification");
 
-                // AJAX call to the backend
+                
                 $.ajax({
                     type: "POST",
-                    url: "ajax.php",
+                    url: "./controllers/ajax.php",
                     async: false,
                     cache: false,
                     processData: false,
@@ -101,9 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                         console.log(response);
 
                         if (call.status == 200) {
-                            toastr.success(response.message); // Use toastr for success message
+                            toastr.success(response.message); 
                         } else {
-                            toastr.error(response.message); // Use toastr for error message
+                            toastr.error(response.message); 
                         }
                     },
                     error: function () {
@@ -155,12 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     </html>
     <?php
 } else {
-    http_response_code(405); // Invalid method
+    http_response_code(405); 
     echo json_encode(["message" => "Invalid request method."]);
 }
 ?>
-<?php
-// Close the database connection
-mysqli_close($con);
-?>
-

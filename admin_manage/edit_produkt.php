@@ -1,12 +1,12 @@
 <?php
-// Fetch product details for editing
+//
 if (isset($_GET['edit_produkt'])) {
     $edit_id = $_GET['edit_produkt'];
     $get_data = "SELECT * FROM `produkt` WHERE produkt_id = $edit_id";
     $result = mysqli_query($con, $get_data);
     $row = mysqli_fetch_assoc($result);
 
-    // Assign values to variables
+    
     $product_name = $row['produkt_name'];
     $product_description = $row['produkt_description'];
     $product_keywords = $row['produkt_keywords'];
@@ -17,13 +17,13 @@ if (isset($_GET['edit_produkt'])) {
     $product_image3 = $row['produkt_image3'];
     $product_price = $row['produkt_price'];
 
-    // Fetch Liga name
+    
     $select_liga = "SELECT * FROM `liga` WHERE liga_id = $liga_id";
     $result_liga = mysqli_query($con, $select_liga);
     $row_liga = mysqli_fetch_assoc($result_liga);
     $liga_name = $row_liga['liga_name'];
 
-    // Fetch Ekip name
+    
     $select_ekip = "SELECT * FROM `ekip` WHERE ekip_id = $ekip_id";
     $result_ekip = mysqli_query($con, $select_ekip);
     $row_ekip = mysqli_fetch_assoc($result_ekip);
@@ -31,13 +31,13 @@ if (isset($_GET['edit_produkt'])) {
 }
 ?>
 
-<div class="container mt-4">
+
     <h1 class="text-center mb-4">Edit Produkt</h1>
-    <form action="" method="POST" enctype="multipart/form-data">
+    <form id="editProductForm" enctype="multipart/form-data">
         <input type="hidden" name="edit_id" value="<?php echo $edit_id; ?>">
 
         <div class="row">
-            <!-- Left column -->
+            
             <div class="col-md-6">
                 <!-- Product Name -->
                 <div class="form-outline mb-3">
@@ -59,23 +59,29 @@ if (isset($_GET['edit_produkt'])) {
 
                 <!-- Product Price -->
                 <div class="form-outline mb-3">
-                    <label for="produkt_price" class="form-label">Cmimi i Produktit (€)</label>
+                    <label for="produkt_price" class="form-label">Cmimi i Produktit ($)</label>
                     <input type="number" step="0.01" required class="form-control" name="produkt_price" id="produkt_price" value="<?php echo htmlspecialchars($product_price); ?>" placeholder="Shkruaj cmimin">
                 </div>
 
                 <!-- Liga Dropdown -->
                 <div class="form-outline mb-3">
                     <label for="produkt_liga" class="form-label">Liga</label>
-                    <select class="form-select" name="produkt_liga" id="produkt_liga">
-                        <option value="<?php echo $liga_id; ?>"><?php echo $liga_name; ?></option>
-                        <?php
-                        $select_query = "SELECT * FROM `liga`";
-                        $result_query = mysqli_query($con, $select_query);
-                        while ($row = mysqli_fetch_assoc($result_query)) {
-                            echo "<option value='{$row['liga_id']}'>{$row['liga_name']}</option>";
-                        }
-                        ?>
-                    </select>
+                    
+            <select name="produkt_liga" id="produkt_liga" class="form-select" onchange="filterTeamsByLiga()">
+                <option value="<?php echo htmlspecialchars($liga_id); ?>"><?php echo htmlspecialchars($liga_name); ?></option>
+                <?php
+                $select_liga_all = "SELECT * FROM `liga`";
+                $result_liga_all = mysqli_query($con, $select_liga_all);
+
+                while ($row_liga_all = mysqli_fetch_assoc($result_liga_all)) {
+                    $other_liga_id = $row_liga_all['liga_id'];
+                    $other_liga_name = $row_liga_all['liga_name'];
+                    if ($other_liga_id != $liga_id) {
+                        echo "<option value='$other_liga_id'>" . htmlspecialchars($other_liga_name) . "</option>";
+                    }
+                }
+                ?>
+            </select>
                 </div>
             </div>
 
@@ -83,10 +89,22 @@ if (isset($_GET['edit_produkt'])) {
             <div class="col-md-6">
                 <!-- Ekip Dropdown -->
                 <div class="form-outline mb-3">
-                    <label for="produkt_ekip" class="form-label">Ekip</label>
-                    <select class="form-select" name="produkt_ekip" id="produkt_ekip">
-                        <option value="<?php echo $ekip_id; ?>"><?php echo $ekip_name; ?></option>
-                    </select>
+                <label for="produkt_ekip" class="form-label">Product Ekip</label>
+            <select name="produkt_ekip" id="produkt_ekip" class="form-select">
+                <option value="<?php echo htmlspecialchars($ekip_id); ?>"><?php echo htmlspecialchars($ekip_name); ?></option>
+                <?php
+                $select_ekip_all = "SELECT * FROM `ekip` WHERE liga_id = $liga_id";
+                $result_ekip_all = mysqli_query($con, $select_ekip_all);
+
+                while ($row_ekip_all = mysqli_fetch_assoc($result_ekip_all)) {
+                    $other_ekip_id = $row_ekip_all['ekip_id'];
+                    $other_ekip_name = $row_ekip_all['ekip_name'];
+                    if ($other_ekip_id != $ekip_id) {
+                        echo "<option value='$other_ekip_id'>" . htmlspecialchars($other_ekip_name) . "</option>";
+                    }
+                }
+                ?>
+            </select>
                 </div>
 
                 <!-- Product Image 1 -->
@@ -120,7 +138,7 @@ if (isset($_GET['edit_produkt'])) {
                 <h5 class="mt-4">Stoku per Masat</h5>
                 <div class="row">
                     <?php
-                    // Fetch stock for each size
+                    
                     $sizes = ['S', 'M', 'L', 'XL', 'XXL'];
                     foreach ($sizes as $size) {
                         // Fetch stock from the sizes table
@@ -131,7 +149,7 @@ if (isset($_GET['edit_produkt'])) {
                         echo "
                             <div class='col-md-4'>
                                 <label for='stock_" . strtolower($size) . "' class='form-label'>$size</label>
-                                <input type='number' class='form-control' name='stock_" . strtolower($size) . "' value='$stock' min='0'>
+                <input type='number' class='form-control' name='stock_" . strtolower($size) . "' id='stock_" . strtolower($size) . "' value='$stock' min='0'>
                             </div>";
                     }
                     ?>
@@ -141,71 +159,72 @@ if (isset($_GET['edit_produkt'])) {
 
         <!-- Submit Button -->
         <div class="text-center mt-4">
-        <input type="submit" class="btn" style="background-color: #ffce00; border-color: #ffce00;" name="edit_produkt" value="Përditëso Produktin">
-        </div>
+        <button type="button" id="submitBtn" class="btn" style="background-color: #ffce00; border-color: #ffce00;">Përditëso Produktin</button>
+    </div>
     </form>
-</div>
 
-<?php
-// Update product data
-if (isset($_POST['edit_produkt'])) {
-    $edit_id = $_POST['edit_id'];
-    $product_name = $_POST['produkt_name'];
-    $product_description = $_POST['produkt_description'];
-    $product_keywords = $_POST['produkt_keywords'];
-    $liga_id = $_POST['produkt_liga'];
-    $ekip_id = $_POST['produkt_ekip'];
-    $product_price = $_POST['produkt_price'];
+    <script>
+document.getElementById('submitBtn').addEventListener('click', function () {
+    const formData = new FormData();
 
-   // Handle images (check if files were uploaded)
-   $product_image1 = isset($_FILES['produkt_image1']['name']) && $_FILES['produkt_image1']['name'] != '' ? $_FILES['produkt_image1']['name'] : $product_image1;
-   $product_image2 = isset($_FILES['produkt_image2']['name']) && $_FILES['produkt_image2']['name'] != '' ? $_FILES['produkt_image2']['name'] : $product_image2;
-   $product_image3 = isset($_FILES['produkt_image3']['name']) && $_FILES['produkt_image3']['name'] != '' ? $_FILES['produkt_image3']['name'] : $product_image3;
-   
-   // Get temporary file paths for each image upload
-   $temp_image1 = $_FILES['produkt_image1']['tmp_name'] ?? '';
-   $temp_image2 = $_FILES['produkt_image2']['tmp_name'] ?? '';
-   $temp_image3 = $_FILES['produkt_image3']['tmp_name'] ?? '';
-   
-   // Move uploaded files if new images are selected
-   if ($temp_image1) {
-       move_uploaded_file($temp_image1, "./produkt_image/$product_image1");
-   }
-   if ($temp_image2) {
-       move_uploaded_file($temp_image2, "./produkt_image/$product_image2");
-   }
-   if ($temp_image3) {
-       move_uploaded_file($temp_image3, "./produkt_image/$product_image3");
-   }
+    
+    const productDetails = {
+        edit_id: <?php echo $edit_id; ?>,
+        produkt_name: document.getElementById('produkt_name').value,
+        produkt_description: document.getElementById('produkt_description').value,
+        produkt_keywords: document.getElementById('produkt_keywords').value,
+        produkt_liga: document.getElementById('produkt_liga').value,
+        produkt_ekip: document.getElementById('produkt_ekip').value,
+        produkt_price: document.getElementById('produkt_price').value,
+    };
 
-    // Update product details in database
-    $update_product = "UPDATE `produkt` SET 
-        produkt_name = '$product_name',
-        produkt_description = '$product_description',
-        produkt_keywords = '$product_keywords',
-        liga_id = '$liga_id',
-        ekip_id = '$ekip_id',
-        produkt_image1 = '$product_image1',
-        produkt_image2 = '$product_image2',
-        produkt_image3 = '$product_image3',
-        produkt_price = '$product_price'
-        WHERE produkt_id = $edit_id";
-    $result_update = mysqli_query($con, $update_product);
-
-    // Handle stock for sizes
-    foreach ($sizes as $size) {
-        $stock = $_POST['stock_' . strtolower($size)] ?? 0;
-        $update_stock = "UPDATE `sizes` SET stock = '$stock' WHERE produkt_id = $edit_id AND size = '$size'";
-        mysqli_query($con, $update_stock);
+    
+    for (const key in productDetails) {
+        formData.append(key, productDetails[key]);
     }
 
-    if ($result_update) {
-        echo "<script>alert('Produkti u përditësua me sukses!');</script>";
-        echo "<script>window.location.href = 'index.php';</script>";
-    } else {
-        echo "<script>alert('Dështoi përditësimi i produktit!');</script>";
-    }
-}
+    
+    const sizes = ['s', 'm', 'l', 'xl', 'xxl'];
+    sizes.forEach(size => {
+        const stockInput = document.getElementById(`stock_${size}`);
+        if (stockInput) {
+            formData.append(`stock_${size}`, stockInput.value || 0);
+        }
+    });
+    
+    const imageFields = ['produkt_image1', 'produkt_image2', 'produkt_image3'];
+    imageFields.forEach(field => {
+        const fileInput = document.getElementById(field);
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append(field, fileInput.files[0]);
+        }
+    });
 
+    
+    fetch('./controllers/update_produkt.php', {
+    method: 'POST',
+    body: formData
+})
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success(data.message, "Sukses");
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 2000); // Delay for 2 seconds to show success notification
+        } else {
+            toastr.error(data.message, "Gabim");
+        }
+    })
+    .catch(error => {
+        toastr.error("Dështoi kërkesa AJAX!", "Gabim");
+        console.error(error);
+    });
+});
+
+</script>
+
+
+    <?php
 mysqli_close($con);
 ?>

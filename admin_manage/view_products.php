@@ -6,7 +6,6 @@
             <th>Product Name</th>
             <th>Product Image</th>
             <th>Product Price</th>
-            <th>Status</th>
             <th>Edit</th>
             <th>Delete</th>
         </tr>
@@ -21,15 +20,15 @@
                 $product_name = $row['produkt_name'];
                 $product_image1 = $row['produkt_image1'];
                 $product_price = $row['produkt_price'];
-                $product_status = $row['status'];
+                
                 $number++;
         ?>
             <tr class="text-center">
                 <td><?php echo $number; ?></td>
                 <td><?php echo $product_name; ?></td>
                 <td><img src='./produkt_image/<?php echo $product_image1; ?>' class='produkt_img' /></td>
-                <td><?php echo $product_price; ?></td>
-                <td><?php echo $product_status; ?></td>
+                <td>$<?php echo $product_price; ?></td>
+                
                 <td>
                     <a href='index.php?edit_produkt=<?php echo $product_id ?>' class="btn btn-warning btn-sm">
                         <i class="fa-solid fa-pen-to-square"></i> Edit
@@ -68,42 +67,71 @@
 
 <script>
     $(document).ready(function () {
-        $('#productTable').DataTable();
+    var table = $('#productTable').DataTable(); 
 
-        // Open the modal and set the Product ID to delete
-        $('.delete-product').click(function () {
-            const productId = $(this).data('id');
-            $('#productIdToDelete').text(productId); // Show the Product ID in the modal
-            $('#deleteModal').modal('show'); // Open the modal
-            $('#confirmDelete').data('id', productId); // Store Product ID on the Delete button
-        });
+    
+    $('.delete-product').click(function () {
+        const productId = $(this).data('id');
+        $('#productIdToDelete').text(productId); 
+        $('#deleteModal').modal('show'); 
+        $('#confirmDelete').data('id', productId); 
+    });
 
-        // Handle the confirmation button click
-        $('#confirmDelete').click(function () {
-            const productId = $(this).data('id');
-            $.ajax({
-                url: 'delete_produkt.php',  // PHP file to handle deletion
-                type: 'POST',
-                data: { product_id: productId },
-                success: function (response) {
-                    const data = JSON.parse(response);
-                    if (data.success) {
-                        alert('Product deleted successfully!');
-                        location.reload(); // Reload the page to update the table
-                    } else {
-                        alert('Failed to delete the product. Please try again.');
-                    }
-                    $('#deleteModal').modal('hide'); // Close the modal
-                },
-                error: function () {
-                    alert('There was an error processing your request.');
-                    $('#deleteModal').modal('hide'); // Close the modal in case of error
+    $('#confirmDelete').click(function () {
+        const productId = $(this).data('id');
+        $.ajax({
+            url: './controllers/delete_produkt.php',  
+            type: 'POST',
+            data: { product_id: productId },
+            success: function (response) {
+                const data = JSON.parse(response);
+                if (data.success) {
+                    
+                    table.row($(`button[data-id="${productId}"]`).closest('tr')).remove().draw();
+                    toastr.success('Product deleted successfully!'); 
+                } else {
+                    toastr.error('Failed to delete the product. Please try again.'); 
                 }
-            });
+                $('#deleteModal').modal('hide'); 
+            },
+            error: function () {
+                toastr.error('There was an error processing your request.'); 
+                $('#deleteModal').modal('hide'); 
+            }
         });
     });
-</script>
-<?php
+});
 
+</script>
+<script>
+        $(document).ready(function () {
+            $('#productTable').DataTable();
+        });
+
+        function filterTeamsByLiga() {
+            const ligaId = document.getElementById('produkt_liga').value;
+            const data = new FormData();
+            data.append("liga_id", ligaId);
+
+            $.ajax({
+                type: "POST",
+                url: "./controllers/fetch_teams.php",
+                async: false,
+                cache: false,
+                processData: false,
+                data: data,
+                contentType: false,
+                success: function (response) {
+                    const ekipSelect = document.getElementById('produkt_ekip');
+                    ekipSelect.innerHTML = `<option value="" disabled selected>Zgjidh nje ekip</option>` + response;
+                },
+                error: function () {
+                    console.error("An error occurred while fetching teams.");
+                }
+            });
+        }
+       
+    </script>
+<?php
 mysqli_close($con);
 ?>

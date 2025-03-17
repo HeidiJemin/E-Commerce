@@ -1,61 +1,4 @@
-<?php
-session_start();
-require __DIR__ . "../vendor/autoload.php";
-include_once('../includes/connect.php');
 
-// Stripe API initialization
-$stripe_secret_key = "sk_test_51QfPWzD5IxD7HeGaK7wRCpyn40IfkKqtNfd0Cla2QtmkYq5zFuv7jox9deuGmaWcmOcNpV88mJiSKNXWsrWYEb8W00kFdRmDNK";
-\Stripe\Stripe::setApiKey($stripe_secret_key);
-
-// Check if session_id is provided
-if (isset($_GET['session_id'])) {
-    $session_id = htmlspecialchars($_GET['session_id']);
-
-    try {
-        // Retrieve the Stripe Checkout session
-        $checkout_session = \Stripe\Checkout\Session::retrieve($session_id);
-
-        // Extract relevant details
-        $user_id = $checkout_session->metadata->user_id ?? null; // Website user ID passed in metadata
-        $stripe_customer_id = $checkout_session->customer ?? null; // Stripe customer ID
-        $total_price = $checkout_session->metadata->total_price ?? 0; // Total price from metadata
-
-        // Prepare JSON data for the `event_data` field
-        $event_data = json_encode([
-            'total_price' => $total_price,
-            'status' => 'cancelled',
-            'stripe_customer_id' => $stripe_customer_id,
-        ], JSON_UNESCAPED_SLASHES);
-
-        // Dynamic SQL query (less secure, avoid for production)
-        $query = "
-            INSERT INTO stripe_logs (session_id, user_id, event_type, event_data, created_at)
-            VALUES ('$session_id', '$user_id', 'checkout.session.cancelled', '$event_data', NOW())
-        ";
-
-        // Execute the query
-        if (mysqli_query($con, $query)) {
-            // Log success
-            error_log("Cancellation logged successfully for session ID: $session_id");
-        } else {
-            // Log database error
-            error_log("Database error: " . mysqli_error($con));
-        }
-    } catch (\Stripe\Exception\ApiErrorException $e) {
-        // Handle Stripe API errors
-        error_log("Stripe API error: " . $e->getMessage());
-    } catch (Exception $e) {
-        // Handle general errors
-        error_log("General error: " . $e->getMessage());
-    }
-} else {
-    error_log("No session_id provided in the request.");
-}
-
-// Redirect or display a cancellation message
-echo "Your payment has been cancelled. If this was an error, please try again.";
-mysqli_close($con);
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -121,10 +64,10 @@ mysqli_close($con);
         <i class="fas fa-times-circle"></i>
     </div>
     <div class="header">
-        Payment Canceled!
+        OOPPPSSS!
     </div>
     <div class="order-info">
-        <p>Your payment was not completed.</p>
+        <p>Something went wrong.</p>
         <p>If you have any questions, please contact support.</p>
         <p>We hope to see you again soon!</p>
     </div>

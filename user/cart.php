@@ -1,29 +1,12 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
-include_once('functions/common_function.php');
+require_once('../includes/connect.php');
+require_once('functions/common_function.php');
 
-// Redirect if user is not logged in
-if (!isset($_SESSION['id'])) {
-    header("Location: login.php");
-    exit();
-}
-
-// Redirect if user role is not customer (assuming role_id = 1 is customer)
-if ($_SESSION['role_id'] != 1) {
-    // Redirect to a different page (you can modify this as needed, for example, admin page)
-    header("Location: admin_manage/index.php"); // Or another page
-    exit();
-}
-
-// Redirect if user's email is not verified
-if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
-    header("Location: verify.php");
-    exit();
-}
-
+require_once('../includes/rememberme_verify.php');
 
 ?>
+
 
 
 <!DOCTYPE html>
@@ -38,155 +21,67 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-  margin: 0;
-  padding: 0;
-  font-family: "Istok Web", sans-serif;
-}
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <link rel="stylesheet" href="./css/cart.css">
+    <script src="./js/inactivity.js" defer></script>
 
-        .container {
-            flex: 1;
-        }
-
-        .btn-checkout {
-            background-color: #ffce00;
-            color: black;
-            font-weight: bold;
-            border: none;
-        }
-
-        .btn-checkout:hover {
-            background-color: black;
-            color: white;
-        }
-
-        footer {
-            margin-top: auto;
-        }
-
-        .total-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .stock-info {
-            font-size: 0.9em;
-            color: #888;
-            display: block;
-        }
-
-        .cart-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-    padding: 10px 0;
-    border-top: 2px solid #ccc;
-    opacity: 1; /* Fully visible by default */
-    visibility: visible; /* Visible by default */
-    transition: opacity 0.3s ease-in-out; /* Smooth fade effect */
-}
-
-.cart-summary.hidden {
-    opacity: 0; /* Invisible but keeps layout space */
-    visibility: hidden; /* Hidden from user */
-}
-
-
-        .cart-summary h4 {
-            margin: 5px 0;
-        }
-
-        .cart-summary .btn-checkout {
-            background-color: #ffce00;
-            color: black;
-            font-weight: bold;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-        }
-
-        .cart-summary .btn-checkout:hover {
-            background-color: black;
-            color: white;
-        }
-        .navbar.bg-black {
-  background-color: black !important;
-  border: none;
-}
-.logo {
-  width: 7%;
-  height: 7%;
-}
-
-/* Navbar link styling */
-.navbar .nav-link {
-  color: white !important; /* White text for navbar links */
-}
-
-.navbar .nav-link:hover {
-  color: #ffce00 !important; /* Hover color for navbar links */
-}
-
-.navbar .nav-link.active {
-  color: #ffce00 !important; /* Active link color */
-}
-
-/* Toggler icon color */
-.navbar-toggler-icon {
-  background-color: white; /* White icon color */
-}
-
-    </style>
+   
 </head>
 
 <body>
-    <!-- Navbar -->
+    
     <?php include("../includes/header.php"); ?>
 
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
-  <ul class="navbar-nav me-auto">
-    <?php
-      if(!isset($_SESSION['id'])){
-        echo '
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="#" style="color: black !important;">Guest</a>
-          </li>
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="login.php" style="color: black !important;">Login</a>
-          </li>
-        ';
-      }else{
-        echo '
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="logout.php" style="color: black !important;">Logout</a>
-          </li>
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="profile.php" style="color: black !important;">Profile</a>
-          </li>
-        ';
-      }
-    ?>
-  </ul>
+    <ul class="navbar-nav me-auto">
+        <?php
+        
+        if (!isset($_SESSION['id']) || (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 0)) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="" style="color: black !important;">Guest</a>
+                </li>
+            ';
+        }
+
+        
+        if (!isset($_SESSION['id'])) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="login.php" style="color: black !important;">Login</a>
+                </li>
+            ';
+        }
+
+        
+        if (isset($_SESSION['id']) && isset($_SESSION['role_id']) && $_SESSION['role_id'] == 1) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="profile.php" style="color: black !important;">Profile</a>
+                </li>
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="logout.php" style="color: black !important;">Logout</a>
+                </li>
+            ';
+        }
+        ?>
+    </ul>
 </nav>
 
+
     <div class="bg-light">
-        <h3 class="text-center">Hidden Store</h3>
+        <h3 class="text-center">Jersey Store</h3>
         <p class="text-center">Welcome to the world of football jerseys</p>
     </div>
+
+    <div style="margin: 14px 0; color: #ff5733; font-family: 'Arial Black', sans-serif; font-size: 1.5em;">
+    <p class="text-center">BUY OVER $50, GET FREE SHIPPING</p>
+</div>
+
 
     <!-- Cart Table -->
     <div class="container my-5">
@@ -248,7 +143,7 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
                                 </td>
                                 <td><span class="price" data-size-id="<?php echo $size_id; ?>">$<?php echo number_format($total_price, 2); ?></span></td>
                                 <td>
-                                    <a href="remove.php?cart_id=<?php echo urlencode($cart_id); ?>" class="remove-btn">
+                                    <a href="./controllers/remove.php?cart_id=<?php echo urlencode($cart_id); ?>" class="remove-btn">
                                         <button class="btn btn-danger">Remove</button>
                                     </a>
                                 </td>
@@ -264,7 +159,10 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
             <div class="cart-summary">
                 <div>
                     <h4>Subtotal: $<span id="cart-subtotal"><?php echo number_format($cart_total, 2); ?></span></h4>
-                    <h4>Shipping Fee: $<span id="shipping-fee">10.00</span></h4>
+                    <?php
+        $shipping_fee = ($cart_total > 50) ? 0 : 10.00; // free shipping for totals over $50
+        ?>
+                    <h4>Shipping Fee: $<span id="shipping-fee"><?php echo number_format($shipping_fee, 2); ?></span></h4>
                     <h4>Total (with Shipping): $<span id="cart-total-with-shipping"><?php echo number_format($cart_total + 10, 2); ?></span></h4>
                 </div>
                 <a href="checkout.php" class="btn btn-checkout">Go to Checkout</a>
@@ -285,12 +183,12 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initialize button states and cart price calculations on page load
+        
         updateButtonStates();
         updateCartTotalPrice();
         checkStockBeforeCheckout(false);
 
-        // Add event listeners to quantity buttons
+        //  event listeners to quantity buttons
         document.querySelectorAll('.quantity-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const sizeId = this.getAttribute('data-size-id');
@@ -299,7 +197,7 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
             });
         });
 
-        // Add event listener to the Checkout button
+        //  event listener to the Checkout button
         document.querySelector('.btn-checkout').addEventListener('click', function (event) {
             event.preventDefault(); // Prevent form submission
             checkStockBeforeCheckout(true);
@@ -330,7 +228,7 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
 
     function updateCartQuantity(sizeId, quantity) {
         $.ajax({
-            url: 'update_cart.php',
+            url: './controllers/update_cart.php',
             type: 'POST',
             data: { size_id: sizeId, quantity: quantity },
             success: function (response) {
@@ -339,11 +237,11 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
                     document.querySelector(`.price[data-size-id='${sizeId}']`).textContent = "$" + updatedPrice.toFixed(2);
                     updateCartTotalPrice();
                 } else {
-                    alert('Error updating the cart. Please try again.');
+                    toastr.error('Error updating the cart. Please try again.');
                 }
             },
             error: function () {
-                alert('Failed to update the cart.');
+                toastr.error('Failed to update the cart.');
             }
         });
     }
@@ -355,17 +253,18 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
             subtotal += price;
         });
 
-        const shippingFee = 10.00; // Static shipping fee
+        const shippingFee = subtotal > 50 ? 0 : 10.00; 
         const total = subtotal + shippingFee;
 
         document.getElementById('cart-subtotal').textContent = subtotal.toFixed(2);
         document.getElementById('cart-total-with-shipping').textContent = total.toFixed(2);
+        document.getElementById('shipping-fee').textContent = shippingFee.toFixed(2);
 
         const cartSummary = document.querySelector('.cart-summary');
     if (subtotal === 0) {
-        cartSummary.classList.add('hidden'); // Hide if cart is empty
+        cartSummary.classList.add('hidden'); 
     } else {
-        cartSummary.classList.remove('hidden'); // Show if cart has items
+        cartSummary.classList.remove('hidden'); 
     }
     }
 
@@ -383,7 +282,8 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
         });
     }
 
-    function checkStockBeforeCheckout(triggeredByUser = false) {
+
+function checkStockBeforeCheckout(triggeredByUser = false) {
     const sizeIds = [];
     document.querySelectorAll('.quantity-input').forEach(inputField => {
         const sizeId = inputField.getAttribute('data-size-id');
@@ -391,7 +291,7 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
     });
 
     $.ajax({
-        url: 'check_stock.php',
+        url: './controllers/check_stock.php',
         type: 'POST',
         data: { size_ids: sizeIds },
         success: function (response) {
@@ -410,45 +310,46 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
                 const quantity = parseInt(inputField.value);
 
                 if (stock === 0) {
-                    // Handle out-of-stock items
+                    
                     stockSpan.textContent = "No more stock left of this size";
                     stockSpan.style.color = "red";
-                    inputField.value = 0;
                     inputField.disabled = true;
                     increaseButton.disabled = true;
                     decreaseButton.disabled = true;
-                    updateCartQuantity(sizeId, 0); // Update the cart with quantity 0
                     outOfStock = true;
                 } else if (quantity > stock) {
-                    // Handle decreased stock
+                    
                     stockSpan.textContent = `This item's stock decreased to ${stock}`;
                     stockSpan.style.color = "red";
-                    inputField.value = stock;
-                    updateCartQuantity(sizeId, stock); // Update the cart with new stock value
+                    inputField.value = stock; 
+                    updateCartQuantity(sizeId, stock); 
                     stockReduced = true;
                 } else {
-                    // Stock is sufficient
+                    
                     stockSpan.textContent = `(${stock} left)`;
                     stockSpan.style.color = "#888";
                 }
 
-                // Update the data-stock attribute dynamically
+                
                 stockSpan.setAttribute('data-stock', stock);
 
-                // Update button states based on the new stock and quantity
-                increaseButton.disabled = parseInt(inputField.value) >= stock;
-                decreaseButton.disabled = parseInt(inputField.value) <= 1;
+                
+                if (stock > 0) {
+                    increaseButton.disabled = quantity >= stock;
+                    decreaseButton.disabled = quantity <= 1;
+                }
             });
-            if(triggeredByUser){
-            if (outOfStock || stockReduced) {
-                alert('Some items in your cart have limited stock. Please review your cart.');
-            } else {
-                window.location.href = 'checkout.php';
+
+            if (triggeredByUser) {
+                if (outOfStock || stockReduced) {
+                    toastr.error('Some items in your cart have limited stock. Please review your cart.');
+                } else {
+                    window.location.href = 'checkout.php';
+                }
             }
-          }
         },
         error: function () {
-            alert('Failed to check stock. Please try again.');
+            toastr.error('Failed to check stock. Please try again.');
         }
     });
 }
@@ -461,9 +362,7 @@ if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
 
 
 </body>
-
-</html>
 <?php
-
 mysqli_close($con);
 ?>
+</html>

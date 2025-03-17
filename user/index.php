@@ -1,51 +1,42 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
-include_once('functions/common_function.php');
+require_once('../includes/connect.php');
+require_once('functions/common_function.php');
 
-if (isset($_SESSION['id'])) {
-    // User is already logged in via session
-    if ((int)$_SESSION['role_id'] == 1) {
-        // User has role_id 1 (normal user), stay on the current page
-        // You can customize this section if needed, but currently it stays on the page.
-    } else {
-        // User has role_id 0 (admin), redirect to admin page
-        header("Location: admin_manage/index.php");
-        exit;
-    }
-} else {
-    // User is not logged in, check if the 'remember_token' cookie is set
-    if (isset($_COOKIE['remember_token'])) {
-        $rememberToken = $_COOKIE['remember_token'];
 
-        
-        $query = "SELECT user_id, email, remember_token, verified, username, role_id FROM users WHERE remember_token = '$rememberToken'";
-        $result = mysqli_query($con, $query);
-
-        if ($result && mysqli_num_rows($result) == 1) {
-            // Token matched, log the user in automatically
-            $user = mysqli_fetch_assoc($result);
-
-            // Set session variables
-            $_SESSION['id'] = $user['user_id'];
-            $_SESSION['email'] = $user['email'];
-            $_SESSION['date_time'] = time();
-            $_SESSION['name'] = $user['username'];
-            $_SESSION['role_id'] = $user['role_id'];
-            $_SESSION['verified'] = $user['verified'];
-
-            // Check role and redirect accordingly
-            if ((int)$_SESSION['role_id'] == 1) {
-                // role_id 1 (normal user)
-                
-            } else {
-                // role_id 0 (admin), redirect to admin page
-                header("Location: admin_manage/index.php");
-                exit;
-            }
-        }
-    }
+if (isset($_SESSION['role_id']) && $_SESSION['role_id'] == 0) {
+  header("Location: ../admin_manage/index.php");
+  exit();
 }
+
+if (isset($_COOKIE['remember_token'])) {
+  $rememberToken = $_COOKIE['remember_token'];
+
+  $query = "SELECT user_id, email, remember_token, verified, username, role_id FROM users WHERE remember_token = '$rememberToken'";
+  $result = mysqli_query($con, $query);
+
+  if ($result && mysqli_num_rows($result) == 1) {
+      $user = mysqli_fetch_assoc($result);
+
+      
+      $_SESSION['id'] = $user['user_id'];
+      $_SESSION['email'] = $user['email'];
+      $_SESSION['date_time'] = time();
+      $_SESSION['name'] = $user['username'];
+      $_SESSION['role_id'] = $user['role_id'];
+      $_SESSION['verified'] = $user['verified'];
+      $_SESSION['username'] = $user['username'];
+
+      
+      if ($_SESSION['role_id'] == 0) {
+        header("Location: ../admin_manage/index.php");
+        exit();
+      }
+  } else {
+      exit(); 
+  }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -65,8 +56,10 @@ if (isset($_SESSION['id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- css file -->
-  <link rel="stylesheet" href="./style.css">
-  <link rel="stylesheet" href="./produkt_style.css">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/produkt_style.css">
+  <script src="./js/inactivity.js" defer></script>
+  
   
   <style>
     * {
@@ -74,161 +67,111 @@ if (isset($_SESSION['id'])) {
       padding: 0;
       font-family: "Istok Web", sans-serif;
     }
+    .main {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+}
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
   </style>
 </head>
 
 <body>
-  <!-- navbar -->
-  <div class="container-fluid p-0 ">
-  <?php
-      include("../includes/header.php")
-    ?>
-      
+  <div class="main">
+    <?php include("../includes/header.php"); ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
-  <ul class="navbar-nav me-auto">
-    <?php
-      if(!isset($_SESSION['id'])){
-        echo '
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="#" style="color: black !important;">Guest</a>
-          </li>
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="login.php" style="color: black !important;">Login</a>
-          </li>
-        ';
-      }else{
-        echo '
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="logout.php" style="color: black !important;">Logout</a>
-          </li>
-          <li class="nav-item ms-3">
-            <a class="nav-link" href="profile.php" style="color: black !important;">Profile</a>
-          </li>
-        ';
-      }
-    ?>
-  </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #ffce00;">
+    <ul class="navbar-nav me-auto">
+        <?php
+        
+        if (!isset($_SESSION['id'])) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="" style="color: black !important;">Guest</a>
+                </li>
+            ';
+        }
+
+        
+        if (!isset($_SESSION['id'])) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="login.php" style="color: black !important;">Login</a>
+                </li>
+            ';
+        }
+
+        
+        if (isset($_SESSION['id'])) {
+            echo '
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="profile.php" style="color: black !important;">Profile</a>
+                </li>
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="logout.php" style="color: black !important;">Logout</a>
+                </li>
+            ';
+        }
+        ?>
+    </ul>
 </nav>
 
 
-
-
-    <div class="bg-light">
-      <h3 class="text-center">Hidden Store</h3>
-      <p class="text-center">Welcomes</p>
+    
+<div class="bg-light text-center py-3 mb-3">
+<h3 class="text-center">Jersey Store</h3>
+<p class="text-center">Welcome to the world of football jerseys</p>
     </div>
 
-    <div class="row px-1 mb-3">
+    <div class="row px-1 mb-3 flex-grow-1"> 
       <div class="col-md-10">
         <div class="row">
-         <?php
-             getprodukt();
-             getproduktbyliga();
-             getproduktbyekip();
-             
-         ?>
-         
+          <?php getprodukt(); getproduktbyliga(); getproduktbyekip(); ?>
         </div>
       </div>
 
-      <div class="col-md-2  p-0 ">
-  <ul class="navbar-nav me-auto text-center" style="list-style-type: none; padding: 0; margin: 0;">
-    <li class="nav-item bg-info" style="height: 50px;">
-      <a class="nav-link text-light" href="#" style="background-color: #ffce00; color: black; display: flex; justify-content: center; align-items: center; height: 100%; padding-left: 0; padding-right: 0;">
-        <span style="font-size: 18px; font-weight: bold;color: black;">Ligat</span>
-      </a>
-    </li>
-    <?php
-        getliga();
-    ?>
-  </ul>
-  <ul class="navbar-nav me-auto text-center" style="list-style-type: none; padding: 0; margin: 0;">
-    <li class="nav-item bg-info" style="height: 50px;">
-      <a class="nav-link text-light" href="#" style="background-color: #ffce00; color: black; display: flex; justify-content: center; align-items: center; height: 100%; padding-left: 0; padding-right: 0;">
-        <span style="font-size: 18px; font-weight: bold;color: black;">Ekipet</span>
-      </a>
-    </li>
-    <?php
-      getekip();
-    ?>
-  </ul>
-</div>
+      <div class="col-md-2 p-0">
+        <ul class="navbar-nav me-auto text-center">
+          <li class="nav-item bg-info">
+            <a class="nav-link text-light" href="#" style="background-color: #ffce00; color: black;">
+              <span style="font-size: 18px; font-weight: bold; color: black;">Ligat</span>
+            </a>
+          </li>
+          <?php getliga(); ?>
+        </ul>
+
+        <ul class="navbar-nav me-auto text-center">
+          <li class="nav-item bg-info">
+            <a class="nav-link text-light" href="#" style="background-color: #ffce00; color: black;">
+              <span style="font-size: 18px; font-weight: bold; color: black;">Ekipet</span>
+            </a>
+          </li>
+          <?php getekip(); ?>
+        </ul>
+      </div>
     </div>
-    
 
-
-
-
-
-
-    <!-- footer -->
-     <footer>
-    <?php
-      include("../includes/footer.php")
-    ?>
+    <!-- Footer -->
+    <footer>
+      <?php include("../includes/footer.php"); ?>
     </footer>
-    </div>
-    
+  </div>
 
-     
-
-
-
-
-
-    <!-- bootstrap js link -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"></script>
-
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const favButtons = document.querySelectorAll(".favourite-btn");
 
-        favButtons.forEach((button) => {
-            button.addEventListener("click", () => {
-                const produktId = button.getAttribute("data-produkt-id");
-
-                // Determine action: Add or Remove
-                const action = button.classList.contains("favourited") ? "remove" : "add";
-
-                // AJAX request
-                fetch("favourites_handler.php", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        produkt_id: produktId,
-                        action: action,
-                    }),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            // Toggle button class and text
-                            button.classList.toggle("favourited");
-                            if (button.classList.contains("favourited")) {
-                                button.textContent = "Remove from Favourites";
-                            } else {
-                                button.textContent = "Add to Favourites";
-                            }
-                        } else {
-                            alert(data.message || "An error occurred.");
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                    });
-            });
-        });
-    });
-</script>
-
+<script src="./js/favourite.js"></script>
 </html>
 <?php
-// Close the database connection
+
 mysqli_close($con);
 ?>

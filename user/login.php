@@ -1,24 +1,74 @@
 <?php
-if (isset($_SESSION['id'])) {
-    // Check if the user has role_id = 1 (customer)
-    if ($_SESSION['role_id'] != 1) {
-        // If not role_id 1, redirect to admin page
-        header("Location: admin_manage/index.php");
-        exit();
-    }
+session_start();
+require_once('../includes/connect.php');
 
-    // If role_id is 1, redirect to index.php
-    header("Location: index.php");
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// admin path
+$adminPath = '../admin_manage/index.php';
+
+
+if (isset($_SESSION['id'])) {
+    if ($_SESSION['role_id'] != 1) {
+        header("Location: $adminPath");
+    } else {
+        header("Location: index.php");
+    }
     exit();
 }
+
+
+if (isset($_COOKIE['remember_token'])) {
+    $rememberToken = mysqli_real_escape_string($con, $_COOKIE['remember_token']);
+
+    
+    $query = "SELECT user_id, email, remember_token, verified, username, role_id 
+              FROM users WHERE remember_token = '$rememberToken'";
+    $result = mysqli_query($con, $query);
+
+    if (!$result) {
+        
+        die("Database query failed: " . mysqli_error($con));
+    }
+
+    if (mysqli_num_rows($result) === 1) {
+        
+        $user = mysqli_fetch_assoc($result);
+
+        $_SESSION['id'] = $user['user_id'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['date_time'] = time();
+        $_SESSION['name'] = $user['username'];
+        $_SESSION['role_id'] = $user['role_id'];
+        $_SESSION['verified'] = $user['verified'];
+        $_SESSION['username'] = $user['username'];
+
+        // Redirect based on role_id
+        if ($_SESSION['role_id'] != 1) {
+            header("Location: $adminPath");
+        } else {
+            header("Location: index.php");
+        }
+        exit();
+    } else {
+        
+        setcookie('remember_token', '', time() - 3600, '/');
+    }
+}
+
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form | CodingLab</title> 
-    <link rel="stylesheet" href="login_style.css">
+    <link rel="stylesheet" href="./css/login_style.css">
     <!-- Include Toastr CSS for notifications -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -73,17 +123,18 @@ if (isset($_SESSION['id'])) {
       };
 
       function loginUser(event) {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault(); 
 
     var email = $("#email").val();
     var password = $("#password").val();
-    var rememberMe = $("#rememberMe").is(":checked"); // Check Remember Me option
+    var rememberMe = $("#rememberMe").is(":checked"); 
 
 
-    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // Simple email regex
+    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; 
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     var error = 0;
 
-    // Validate email
+    
     if (isEmpty(email)) {
         $("#email").addClass("error");
         $("#emailError").text("Email cannot be empty");
@@ -94,32 +145,32 @@ if (isset($_SESSION['id'])) {
         error++;
     } else {
         $("#email").removeClass("error");
-        $("#emailError").text(""); // Clear the error message
+        $("#emailError").text(""); 
     }
 
-    // Validate password
+    
     if (isEmpty(password)) {
         $("#password").addClass("error");
         $("#passwordError").text("Password cannot be empty");
         error++;
     } else {
         $("#password").removeClass("error");
-        $("#passwordError").text(""); // Clear the error message
+        $("#passwordError").text(""); 
     }
 
-    // If no errors, proceed with AJAX request
+    
     if (error === 0) {
         var data = new FormData();
         data.append("action", "login");
         data.append("email", email);
         data.append("password", password);
-        data.append("rememberMe", rememberMe); // Pass Remember Me status
+        data.append("rememberMe", rememberMe); 
 
 
-        // AJAX call to the backend
+        
         $.ajax({
             type: "POST",
-            url: "ajax.php",
+            url: "./controllers/ajax.php",
             async: false,
             cache: false,
             processData: false,
@@ -133,7 +184,7 @@ if (isset($_SESSION['id'])) {
                         window.location.href = response.verified ? response.location : "./verify.php";
                     }, 2500);
                 } else {
-                    toastr.error(response.message); // Display error message from server
+                    toastr.error(response.message); 
                 }
             },
             error: function() {

@@ -42,12 +42,12 @@ session_start();
     <h2 class="mt-3 text-danger">Unauthorized Access</h2>
     <p class="lead">You do not have permission to access this page.</p>
     
-    <!-- Check if a session message exists -->
+    
     <?php if (isset($_SESSION['auth_error'])): ?>
         <div class="alert alert-warning">
             <?= htmlspecialchars($_SESSION['auth_error']); ?>
         </div>
-        <?php unset($_SESSION['auth_error']); ?> <!-- Clear message after displaying -->
+        <?php unset($_SESSION['auth_error']); ?>
     <?php endif; ?>
 
     <div class="d-grid gap-2 mt-4">
@@ -59,6 +59,6 @@ session_start();
 </body>
 </html>
 <?php
-// Close the database connection
+
 mysqli_close($con);
 ?>

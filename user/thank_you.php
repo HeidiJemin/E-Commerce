@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bootstrap 5 Thank You Example</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="./js/inactivity.js" defer></script>
 </head>
 
 <body>
@@ -30,6 +31,6 @@
 
 </html>
 <?php
-// Close the database connection
+
 mysqli_close($con);
 ?>

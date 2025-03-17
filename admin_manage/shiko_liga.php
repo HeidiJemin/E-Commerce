@@ -31,13 +31,13 @@
         <td class="text-center"><?php echo $number; ?></td>
         <td class="text-center"><?php echo $liga_name; ?></td>
         <td class="text-center">
-          <!-- Edit button with yellow style -->
+          
           <a href="index.php?edit_liga=<?php echo $liga_id ?>" class="btn btn-warning btn-sm">
             <i class="fa-solid fa-pen-to-square"></i> Edit
           </a>
         </td>
         <td class="text-center">
-          <!-- Delete button with red style -->
+          
           <button class="btn btn-danger btn-sm delete-liga" data-id="<?php echo $liga_id; ?>">
             <i class="fa-solid fa-trash"></i> Delete
           </button>
@@ -59,7 +59,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        Are you sure you want to delete this Liga? This action cannot be undone.
+        Are you sure you want to delete it?.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -75,7 +75,7 @@
       paging: true,
       searching: true,
       info: true,
-      responsive: true, // Makes table responsive
+      responsive: true, 
       language: {
         search: "Search Liga:",
         paginate: {
@@ -87,27 +87,27 @@
       }
     });
 
-    let ligaIdToDelete = null; // Variable to store the ID of the Liga to be deleted
+    let ligaIdToDelete = null; 
 
-    // Handle delete button click (show modal)
+    // (show modal)
     $(document).on('click', '.delete-liga', function () {
       ligaIdToDelete = $(this).data('id');
-      $('#deleteConfirmationModal').modal('show'); // Show the confirmation modal
+      $('#deleteConfirmationModal').modal('show'); 
     });
 
-    // Handle confirmation button click (AJAX delete)
+    
     $('#confirmDeleteButton').click(function () {
       if (ligaIdToDelete) {
         $.ajax({
-          url: 'delete_liga.php',  // PHP file to handle deletion
+          url: './controllers/delete_liga.php',  
           type: 'POST',
           data: { liga_id: ligaIdToDelete },
           success: function (response) {
             try {
-              const data = JSON.parse(response); // Parse the response to JSON
+              const data = JSON.parse(response); 
 
               if (data.success) {
-                // Show success toast
+                
                 const toast = document.createElement('div');
                 toast.style.position = 'fixed';
                 toast.style.bottom = '20px';
@@ -120,13 +120,13 @@
                 toast.textContent = data.message;
                 document.body.appendChild(toast);
 
-                // Remove the toast after 3 seconds
+                
                 setTimeout(() => toast.remove(), 3000);
 
-                // Remove the deleted row from the DataTable
+
                 table.row('#liga-' + ligaIdToDelete).remove().draw();
               } else {
-                // Show error toast
+                
                 const toast = document.createElement('div');
                 toast.style.position = 'fixed';
                 toast.style.bottom = '20px';
@@ -139,7 +139,7 @@
                 toast.textContent = data.message;
                 document.body.appendChild(toast);
 
-                // Remove the toast after 3 seconds
+                
                 setTimeout(() => toast.remove(), 3000);
               }
             } catch (e) {
@@ -150,7 +150,7 @@
             alert('There was an error processing your request.');
           },
           complete: function () {
-            // Close the modal after the deletion
+            
             $('#deleteConfirmationModal').modal('hide');
           }
         });

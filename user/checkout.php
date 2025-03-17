@@ -1,26 +1,10 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
-include_once('functions/common_function.php');
+require_once('../includes/connect.php');
+require_once('functions/common_function.php');
 
-// Ensure user is logged in
-if (!isset($_SESSION['id'])) {
-    header("Location: login.php");
-    exit();
-}
+require_once('../includes/rememberme_verify.php');
 
-// Redirect if user's email is not verified
-if (isset($_SESSION['id']) && $_SESSION['verified'] != '1') {
-    header("Location: verify.php");
-    exit();
-}
-
-// Redirect if user role is not customer (assuming role_id = 1 is customer)
-if ($_SESSION['role_id'] != 1) {
-    // Redirect to a different page (you can modify this as needed, for example, admin page)
-    header("Location: admin_manage/index.php"); // Or another page
-    exit();
-}
 $user_id = $_SESSION['id']; // Retrieve user ID from session
 
 // Fetch cart details with size and stock
@@ -40,7 +24,7 @@ if (!$cart_result || mysqli_num_rows($cart_result) === 0) {
     exit;
 }
 
-// Process cart items and check stock availability
+
 while ($item = mysqli_fetch_assoc($cart_result)) {
     $produkt_id = (int) $item['produkt_id'];
     $size_id = (int) $item['size_id'];
@@ -48,14 +32,15 @@ while ($item = mysqli_fetch_assoc($cart_result)) {
     $quantity_requested = max(1, (int) $item['quantity']);
     $available_stock = (int) $item['stock'];
 
-    // Check if requested quantity exceeds available stock
+    
     if ($quantity_requested > $available_stock) {
-        $_SESSION['stock_error'] = "Stock unavailable for '{$item['produkt_name']}' (Size: $size). Available stock: $available_stock.";
+        
         header("Location: cart.php");
         exit;
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -71,75 +56,15 @@ while ($item = mysqli_fetch_assoc($cart_result)) {
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap" rel="stylesheet">
+    <script src="./inactivity.js" defer></script>
+    <link href="./css/checkout.css" rel="stylesheet">
+    <script src="./js/inactivity.js" defer></script>
   
   
-  <style>
-    /* Optional: Style for error highlighting */
-    .error {
-      border-color: #dc3545;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      font-family: "Istok Web", sans-serif;
-    }
-    /* Ensure that the body takes the full height */
-html, body {
-  height: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Main content section */
-.content {
-  flex-grow: 1; /* Take the remaining space between the header and footer */
-  padding-bottom: 60px; /* Adjust the bottom padding to avoid content hidden behind the footer */
-}
-.logo {
-  width: 7%;
-  height: 7%;
-}
-.navbar .nav-link {
-  color: white !important; /* White text for navbar links */
-}
-
-.navbar .nav-link:hover {
-  color: #ffce00 !important; /* Hover color for navbar links */
-}
-
-.navbar .nav-link.active {
-  color: #ffce00 !important; /* Active link color */
-}
-
-/* Toggler icon color */
-.navbar-toggler-icon {
-  background-color: white; /* White icon color */
-}
-/* Footer Styling */
-footer {
-  background-color: black;
-  color: white;
-  font-family: 'Roboto', sans-serif;
-  text-align: center;
-  padding: 15px;
-}
-/* Search form button */
-form .btn-outline-light {
-  border-color: #fff !important;
-  color: white !important;
-}
-
-form .btn-outline-light:hover {
-  background-color: #ffce00;
-  color: white !important;
-}
-
-  </style>
 </head>
 <body>
 <?php include("../includes/header.php"); ?>
-<div class="content">
+
 <div class="card">
   <div class="card-body">
     <h1 class="text-center py-5">Checkout</h1>
@@ -152,7 +77,7 @@ form .btn-outline-light:hover {
       <?php } else {
         $user_id = $_SESSION['id'];
         $cart_query = "
-          SELECT c.produkt_id, c.quantity, p.produkt_name, p.produkt_price, p.produkt_image1, s.size 
+          SELECT c.produkt_id, c.quantity, p.produkt_name, p.produkt_price, p.produkt_image1, s.size,c.size_id 
           FROM `cart` c
           JOIN `produkt` p ON c.produkt_id = p.produkt_id
           JOIN `sizes` s ON c.size_id = s.size_id
@@ -160,14 +85,14 @@ form .btn-outline-light:hover {
         ";
         $cart_items_result = mysqli_query($con, $cart_query);
         $subtotal = 0;
-        $shipping_cost = 10.00; // Flat shipping rate
+        $shipping_cost = 10.00; 
 
         if (mysqli_num_rows($cart_items_result) > 0) { ?>
           <form id="checkout_form" action="charge.php" method="POST" novalidate>
     <div class="row">
         <!-- Address Section -->
         <div class="col-md-7">
-            <h3>Shipping Address</h3>
+            <h3>Shipping Address and Details</h3>
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="firstname" class="form-label">First Name</label>
@@ -191,10 +116,11 @@ form .btn-outline-light:hover {
                 <span id="phoneError" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Email">
-                <span id="emailError" class="text-danger"></span>
-            </div>
+    <label for="email" class="form-label">Email</label>
+    
+    <input type="email" class="form-control" id="email" name="email" placeholder="Email" value="<?php echo $_SESSION['email'] ?? ''; ?>" readonly>
+    <span id="emailError" class="text-danger"></span>
+</div>
             <div class="mb-3">
                 <label for="city" class="form-label">City</label>
                 <input type="text" class="form-control" id="city" name="city" placeholder="City">
@@ -223,12 +149,13 @@ form .btn-outline-light:hover {
                     $total_price = $item['produkt_price'] * $item['quantity'];
                     $subtotal += $total_price;
                     
-                    // Save cart items in a hidden input for Stripe processing
+                    // Save cart items 
                     $cart_items[] = [
                         'produkt_id' => $item['produkt_id'],
                         'item_name' => $item['produkt_name'],
                         'quantity' => $item['quantity'],
                         'size' => $item['size'],
+                        'size_id' => $item['size_id'],
                         'price' => $item['produkt_price'],
                         'total_price' => $total_price
                     ];
@@ -254,6 +181,13 @@ form .btn-outline-light:hover {
             </div>
             <div class="d-flex justify-content-between">
                 <span>Shipping:</span>
+                <?php 
+                    if($subtotal >= 50){
+                        $shipping_cost = 0;
+                    }else{
+                        $shipping_cost = 10;
+                    }
+                    ?>
                 <span>$<?= number_format($shipping_cost, 2); ?></span>
             </div>
             <hr>
@@ -263,7 +197,7 @@ form .btn-outline-light:hover {
             </div>
             <hr>
 
-            <!-- Pass essential order details to charge.php -->
+            
             <input type="hidden" name="user_id" value="<?= $user_id; ?>">
             <input type="hidden" name="total_price" value="<?= $subtotal + $shipping_cost; ?>">
             <input type="hidden" name="cart_items" value='<?= json_encode($cart_items); ?>'>
@@ -294,14 +228,16 @@ form .btn-outline-light:hover {
     document.querySelectorAll("input[type='text'], textarea").forEach((input) => {
   input.addEventListener("input", (event) => {
     const value = event.target.value;
-    event.target.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    if (value.length > 0) {
+      event.target.value = value.charAt(0).toUpperCase() + value.slice(1);
+    }
   });
 });
 $('#checkout_form').on("submit", function (event) {
     let error = 0;
     const isEmpty = (value) => value.trim() === "";
 
-    // Validate First Name
+    
     const firstname = $("#firstname").val();
     if (isEmpty(firstname)) {
         $("#firstname").addClass("error");
@@ -312,7 +248,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#firstnameError").text("");
     }
 
-    // Validate Last Name
+    
     const lastname = $("#lastname").val();
     if (isEmpty(lastname)) {
         $("#lastname").addClass("error");
@@ -323,7 +259,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#lastnameError").text("");
     }
 
-    // Validate Country
+    
     const country = $("#country").val();
     if (isEmpty(country)) {
         $("#country").addClass("error");
@@ -350,7 +286,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#phoneError").text("");
     }
 
-    // Validate Email
+    
     const email = $("#email").val();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (isEmpty(email)) {
@@ -366,7 +302,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#emailError").text("");
     }
 
-    // Validate City
+    
     const city = $("#city").val();
     if (isEmpty(city)) {
         $("#city").addClass("error");
@@ -377,7 +313,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#cityError").text("");
     }
 
-    // Validate Address
+    
     const address = $("#address").val();
     if (isEmpty(address)) {
         $("#address").addClass("error");
@@ -404,7 +340,7 @@ $('#checkout_form').on("submit", function (event) {
         $("#zipcodeError").text("");
     }
 
-    // If there are validation errors, prevent form submission
+    // If errors, prevent form submission
     if (error > 0) {
         event.preventDefault();
     }
@@ -413,6 +349,7 @@ $('#checkout_form').on("submit", function (event) {
 </body>
 </html>
 <?php
-// Close the database connection
+
+
 mysqli_close($con);
 ?>

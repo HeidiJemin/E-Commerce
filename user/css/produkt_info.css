@@ -1,0 +1,327 @@
+@import url("https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap");
+.logo {
+  width: 7%;
+  height: 7%;
+}
+footer {
+  margin-top: auto;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+body {
+  background-color: #f8f9fa; /* Optional light background */
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+/* Custom styling for the black navbar */
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+html {
+  min-height: 100%;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important; /* White text for navbar links */
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important; /* Hover color for navbar links */
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important; /* Active link color */
+}
+
+/* Toggler icon color */
+.navbar-toggler-icon {
+  background-color: white; /* White icon color */
+}
+
+/* Columns for Layout */
+.column {
+  width: 600px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Featured Image */
+#featured {
+  max-width: 500px;
+  max-height: 600px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid black;
+  margin: 0 auto;
+  display: block;
+}
+#content-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+}
+
+/* Thumbnails Wrapper */
+#thumbnails-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* Thumbnail Images */
+.thumbnail {
+  object-fit: cover;
+  max-width: 150px;
+  max-height: 80px;
+  cursor: pointer;
+  opacity: 0.5;
+  border: 2px solid black;
+  transition: 0.3s ease;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+  opacity: 1;
+  border-color: #007bff; /* Highlight border when active */
+}
+
+/* Product Details */
+.column h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.column h3 {
+  font-size: 1.5rem;
+  color: #28a745;
+}
+
+.column p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #555;
+  margin: 15px 0;
+}
+
+/* General Styling */
+.size-selector,
+.custom-selector {
+  margin: 15px 0;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+  color: #333;
+  font-size: 16px;
+}
+
+.sizes,
+.custom-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Button Styling */
+.size-btn,
+.custom-btn {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  background-color: #f8f9fa;
+  color: #333;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.size-btn:hover,
+.custom-btn:hover {
+  background-color: #ffc107; /* Yellow hover effect */
+  color: #fff;
+}
+
+.size-btn.out-of-stock {
+  background-color: #f1f1f1;
+  color: #ccc;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+/* Default size button style */
+.size-btn {
+  background-color: #f0f0f0; /* Light gray */
+  color: #000; /* Black text */
+  border: 1px solid #ccc; /* Light gray border */
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.size-btn.active {
+  background-color: #ffc107;
+  color: #fff;
+  border: 1px solid #ffc107;
+}
+
+.size-btn.out-of-stock {
+  background-color: #e0e0e0;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  border: 1px solid #ccc;
+  pointer-events: none;
+}
+
+.size-btn:disabled:hover,
+.size-btn.out-of-stock:hover {
+  background-color: #e0e0e0;
+  color: #a0a0a0;
+  cursor: not-allowed;
+  border: 1px solid #ccc;
+}
+
+.add-to-cart-btn {
+  background-color: #343a40; /* Dark background */
+  color: #fff; /* White text */
+  border: 1px solid #343a40;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-decoration: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.add-to-cart-btn:not(:disabled):hover {
+  background-color: #23272b;
+  color: #ffce00;
+  border-color: #ffce00;
+  cursor: pointer;
+  opacity: 1;
+}
+
+.add-to-cart-btn:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  background-color: #343a40;
+  color: #aaa;
+  border: 1px solid #343a40;
+}
+
+.testimonials-section {
+  background-color: #000;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.testimonials-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonials-container h2 {
+  font-size: 2.5em;
+  color: black;
+  margin-bottom: 20px;
+}
+
+.testimonials-container .description {
+  color: black;
+  font-size: 1em;
+  margin-bottom: 40px;
+}
+
+.testimonials {
+  display: flex;
+  justify-content: space-between;
+  /*gap: 20px;*/
+  flex-wrap: wrap;
+  width: 100%;
+  margin-left: 90px;
+  background-color: #a5baa8;
+  margin-bottom: 10px;
+}
+
+/* Styling for each card */
+.card {
+  background-color: #f8f9fa; /* Yellow background for cards */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Darker shadow to match the black background */
+  padding: 20px;
+  width: calc(
+    33.333% - 20px
+  ); /* Adjust for 3 cards per row, accounting for the gap */
+  max-width: 300px;
+  text-align: center;
+  border: 2px solid white;
+  margin: 10px;
+}
+
+/* Hover effect for the cards */
+.card:hover {
+  transform: translateY(-10px);
+  transition: 0.3s ease-in-out;
+}
+
+/* Circular image container */
+.image-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid white;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+/* Image inside the container */
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Card heading */
+.card h3 {
+  font-size: 1.25em;
+  color: #333; /* Dark text */
+  margin-bottom: 10px;
+}
+
+/* Styling for the quote text */
+.card .quote {
+  font-style: italic;
+  color: #555; /* Darker text */
+  font-size: 0.9em;
+}
+
+.description {
+  margin-left: 90px;
+}
+h2 {
+  margin-left: 10px;
+}

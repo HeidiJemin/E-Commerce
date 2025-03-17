@@ -1,0 +1,106 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+
+.btn-checkout {
+  background-color: #ffce00;
+  color: black;
+  font-weight: bold;
+  border: none;
+}
+
+.btn-checkout:hover {
+  background-color: black;
+  color: white;
+}
+
+footer {
+  margin-top: auto;
+}
+
+.total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.stock-info {
+  font-size: 0.9em;
+  color: #888;
+  display: block;
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  border-top: 2px solid #ccc;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.cart-summary.hidden {
+  opacity: 0;
+  visibility: hidden; /* Hidden from user */
+}
+
+.cart-summary h4 {
+  margin: 5px 0;
+}
+
+.cart-summary .btn-checkout {
+  background-color: #ffce00;
+  color: black;
+  font-weight: bold;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+.cart-summary .btn-checkout:hover {
+  background-color: black;
+  color: white;
+}
+.navbar.bg-black {
+  background-color: black !important;
+  border: none;
+}
+.logo {
+  width: 7%;
+  height: 7%;
+}
+
+/* Navbar link styling */
+.navbar .nav-link {
+  color: white !important;
+}
+
+.navbar .nav-link:hover {
+  color: #ffce00 !important;
+}
+
+.navbar .nav-link.active {
+  color: #ffce00 !important;
+}
+
+.navbar-toggler-icon {
+  background-color: white;
+}

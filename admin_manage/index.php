@@ -1,32 +1,62 @@
-
 <?php
-// Start the session and include necessary files
 session_start();
-ob_start();
-include('../includes/connect.php');
+require_once('../includes/connect.php');
 
-// Check if the user is logged in
-if (!isset($_SESSION['id'])) {
-    // Redirect to the login page if not logged in
-    header("Location: ../login.php");
-    exit;
+
+if (isset($_SESSION['id'])) {
+   
+    if ((int)$_SESSION['role_id'] === 0) {
+        
+        
+    } else {
+      
+        header("Location: ./unauthorized.php");
+        exit;
+    }
+} else {
+    
+    if (isset($_COOKIE['remember_token'])) {
+        $rememberToken = $_COOKIE['remember_token'];
+
+        $query = "SELECT user_id, email, remember_token, verified, username, role_id FROM users WHERE remember_token = '$rememberToken'";
+        $result = mysqli_query($con, $query);
+
+        if ($result && mysqli_num_rows($result) == 1) {
+           
+            $user = mysqli_fetch_assoc($result);
+
+            
+            if ((int)$user['role_id'] === 0) {
+                
+                $_SESSION['id'] = $user['user_id'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['date_time'] = time();
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role_id'] = $user['role_id'];
+                $_SESSION['verified'] = $user['verified'];
+
+                
+            } else {
+                
+                header("Location: ./unauthorized.php");
+                exit;
+            }
+        } else {
+            
+            header("Location: ../user/login.php");
+            exit;
+        }
+    } else {
+        
+        header("Location: ../user/login.php");
+        exit;
+    }
 }
-
-// Ensure the user has admin privileges
-if ((int)$_SESSION['role_id'] !== 0) {
-    // Redirect unauthorized users to the home page or another appropriate page
-    header("Location: ../index.php");
-    exit;
-}
-
-// Optional: Log the current user details for auditing or debugging (remove in production)
 $username = $_SESSION['username'];
-$userId = $_SESSION['id'];
-
-// Example logging (optional, for debugging)
-// error_log("Admin Access: User ID: $userId, Username: $username");
 
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,33 +66,41 @@ $userId = $_SESSION['id'];
     <title>Admin Dashboard</title>
     <!-- CSS and JS links -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./admin_style.css">
+    <link rel="stylesheet" href="./css/admin_style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
  <!-- JS scripts -->
  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
+        * {
+  margin: 0;
+  padding: 0;
+  font-family: "Istok Web", sans-serif;
+}
+
+html,
+body {
+  
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
         .container-fluid {
             flex: 1;
         }
+        
         
         .produkt_img {
             width: 90px;
@@ -108,7 +146,7 @@ $userId = $_SESSION['id'];
     <div class="container-fluid p-0">
     <nav class="navbar navbar-expand-lg" style="background-color: #000; color: #fff;">
     <div class="container-fluid">
-        <img src="../images/logo.png" class="logo" alt="Logo">
+        <img src="./produkt_image/logo.png" class="logo" alt="Logo">
         <nav class="navbar navbar-expand-lg">
             <ul class="navbar-nav">
                 <!-- Home Button -->
@@ -163,7 +201,7 @@ $userId = $_SESSION['id'];
             <a href="index.php?shiko_user" class="custom-btn nav-link">
                 PERDORUESIT
             </a>
-            <a href="../logout.php" class="custom-btn nav-link">
+            <a href="../user/logout.php" class="custom-btn nav-link">
                 LOGOUT
             </a>
         </div>
@@ -174,78 +212,67 @@ $userId = $_SESSION['id'];
         <div class="container my-5">
             <?php
             if (isset($_GET['shto_liga'])) {
-                include('shto_liga.php');
+                include_once('shto_liga.php');
             }
             if (isset($_GET['shto_ekipe'])) {
-                include('shto_ekipe.php');
+                include_once('shto_ekipe.php');
             }
             if (isset($_GET['view_products'])) {
-                include('view_products.php');
+                include_once('view_products.php');
             }
             if (isset($_GET['edit_produkt'])) {
-                include('edit_produkt.php');
+                include_once('edit_produkt.php');
             }
-            
             if (isset($_GET['shiko_liga'])) {
-                include('shiko_liga.php');
+                include_once('shiko_liga.php');
             }
             if (isset($_GET['shiko_ekip'])) {
-                include('shiko_ekip.php');
+                include_once('shiko_ekip.php');
             }
             if (isset($_GET['edit_liga'])) {
-                include('edit_liga.php');
+                include_once('edit_liga.php');
             }
             if (isset($_GET['edit_ekip'])) {
-                include('edit_ekip.php');
+                include_once('edit_ekip.php');
             }
             if (isset($_GET['shiko_user'])) {
-                include('shiko_user.php');
+                include_once('shiko_user.php');
             }
             if (isset($_GET['delete_ekip'])) {
-                include('delete_ekip.php');
+                include_once('delete_ekip.php');
             }
             if (isset($_GET['shiko_porosi'])) {
-                include('shiko_porosi.php');
+                include_once('shiko_porosi.php');
             }
             if (isset($_GET['shiko_pagesa'])) {
-                include('shiko_pagesa.php');
+                include_once('shiko_pagesa.php');
             }
             ?>
         </div>
     </div>
 
-    
-
-   
+</body>
 
     <script>
-        $(document).ready(function () {
-            $('#productTable').DataTable();
-        });
-
-        function filterTeamsByLiga() {
-            const ligaId = document.getElementById('produkt_liga').value;
-            const data = new FormData();
-            data.append("liga_id", ligaId);
-
-            $.ajax({
-                type: "POST",
-                url: "fetch_teams.php",
-                async: false,
-                cache: false,
-                processData: false,
-                data: data,
-                contentType: false,
-                success: function (response) {
-                    const ekipSelect = document.getElementById('produkt_ekip');
-                    ekipSelect.innerHTML = `<option value="" disabled selected>Zgjidh nje ekip</option>` + response;
-                },
-                error: function () {
-                    console.error("An error occurred while fetching teams.");
-                }
-            });
-        }
-        function previewImage(imageNumber) {
+        
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+    function previewImage(imageNumber) {
     var fileInput = document.getElementById('produkt_image' + imageNumber);
     var file = fileInput.files[0];
     var preview = document.getElementById('preview_image' + imageNumber);
@@ -253,15 +280,15 @@ $userId = $_SESSION['id'];
     if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
-            preview.src = e.target.result; // Update image preview
+            preview.src = e.target.result; 
         };
         reader.readAsDataURL(file);
     } else {
-        // If no file is selected, keep the default image
+        
         preview.src = './produkt_image/<?php echo $product_image1; ?>';
     }
 }
-    </script>
+</script>
+
     
-</body>
 </html>

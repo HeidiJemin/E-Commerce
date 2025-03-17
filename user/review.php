@@ -1,20 +1,30 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
-include_once('functions/common_function.php');
+require_once('../includes/connect.php');
+require_once('functions/common_function.php');
 
-// Ensure database connection is established
+
 if (!$con) {
     die("Error: " . mysqli_connect_error());
 }
 
-$name = ""; // Default value for name
-$email = ""; // Default value for email
-$produkt_id = isset($_GET['produkt_id']) ? intval($_GET['produkt_id']) : 0; // Get produkt_id from URL
+require_once('../includes/rememberme.php');
+
+$name = ""; 
+$email = ""; 
+
+if (!isset($_GET['produkt_id']) || intval($_GET['produkt_id']) <= 0) {
+    
+    header("Location: index.php");
+    exit();
+}
+
+
+$produkt_id = intval($_GET['produkt_id']);
 
 
 if (isset($_SESSION["id"])) {
-    $user_id = $_SESSION['id']; // Get the logged-in user's ID
+    $user_id = $_SESSION['id']; 
     $query = "SELECT * FROM users WHERE user_id = '$user_id'";
     $result = mysqli_query($con, $query);
 
@@ -23,9 +33,9 @@ if (isset($_SESSION["id"])) {
     }
 
     if ($result->num_rows > 0) {
-        $user = mysqli_fetch_assoc($result); // Fetch user data
-        $name = htmlspecialchars($user['name']); // Pre-fill the name
-        $email = htmlspecialchars($user['email']); // Pre-fill the email
+        $user = mysqli_fetch_assoc($result); 
+        $name = htmlspecialchars($user['name']); 
+        $email = htmlspecialchars($user['email']); 
     }
 }
 ?>
@@ -33,10 +43,22 @@ if (isset($_SESSION["id"])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
+<!-- Include jQuery (required for toastr and your script) -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- Include Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<!-- Include Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="./js/inactivity.js" defer></script>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Testimonial</title>
-    <link rel="stylesheet" href="reviewStyle.css">
+    <link rel="stylesheet" href="./css/reviewStyle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -77,10 +99,7 @@ if (isset($_SESSION["id"])) {
             </div>
             <input type="hidden" id="rating" name="rating" value="">
 
-            <!-- Date of Experience -->
-            <div class="input-box date-picker">
-                <input type="date" id="experienceDate" name="experienceDate" required>
-            </div>
+          
 
             <!-- Satisfaction Level -->
             <p>Satisfaction Level</p>
@@ -136,7 +155,7 @@ if (isset($_SESSION["id"])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-    $(document).ready(function () {
+  $(document).ready(function () {
     // Handle star rating
     $('.rating .fa-star').on('click', function () {
         let rating = $(this).data('value');
@@ -199,46 +218,52 @@ if (isset($_SESSION["id"])) {
         data.append("email", email);
         data.append("testimonial", testimonial);
         data.append("rating", $('#rating').val());
-        data.append("experienceDate", $('#experienceDate').val());
+       // data.append("experienceDate", $('#experienceDate').val());
         data.append("satisfaction", $('input[name="satisfaction"]:checked').val());
         data.append("recommend", $('input[name="recommend"]:checked').val());
         data.append("consent", $('input[name="consent"]:checked').val());
+        data.append("produkt_id", parseInt($('#produkt_id').val()));
 
-        // AJAX call to backend (ajax.php)
+        // AJAX call to backend
         $.ajax({
-    type: "POST",
-    url: "ajaxtestimonial.php",
-    data: data,
-    processData: false,
-    contentType: false,
-    cache: false,
-    success: function (response) {
-        try {
-            response = JSON.parse(response); // Parse JSON response
-            if (response.status === 'success') {
-                alert(response.message); // Show success message
+            type: "POST",
+            url: "./controllers/ajaxtestimonial.php",
+            data: data,
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
 
-                // Redirect to the URL provided in the response
-                if (response.redirect) {
-                    window.location.href = response.redirect;
+                    if (response.status === 'success') {
+                        toastr.success(response.message, "Success");
+                        if (response.redirect) {
+                            setTimeout(() => {
+                                window.location.href = response.redirect; 
+                            }, 2000); 
+                        }
+                    } else if (response.status === 'exists') {
+                        toastr.warning(response.message, "Cannot make");
+                        setTimeout(() => {
+                                window.location.href = "../user/index.php"; 
+                            }, 2000); 
+                    } else {
+                        toastr.error(response.message || "An unknown error occurred.", "Error");
+                    }
+                } catch (e) {
+                    console.error("Error parsing JSON response:", e);
+                    toastr.error("Unexpected error occurred.", "Error");
                 }
-            } else {
-                alert(response.message); // Show error message
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", error);
+                toastr.error("A network error occurred. Please try again.", "Network Error");
             }
-        } catch (e) {
-            console.error("Error parsing JSON response:", e);
-            alert("Error parsing the response. Please try again.");
-        }
-    },
-    error: function (xhr, status, error) {
-        console.error("AJAX Error:", error);
-        alert("An error occurred while submitting your testimonial. Please try again.");
-    }
-});
-
-
+        });
     });
 });
+
 </script>
 
 </body>

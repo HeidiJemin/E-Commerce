@@ -1,18 +1,17 @@
 <?php
 session_start();
 require __DIR__ . "/../vendor/autoload.php";
+require_once('../includes/connect.php');
 
-include_once('../includes/connect.php');
+// Redirect to cart.php if the request method is not POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // Redirect to cart.php if the request method is not POST
     header("Location: cart.php");
-    exit; // Stop further execution
+    exit;
 }
-$stripe_secret_key = "sk_test_51QfPWzD5IxD7HeGaK7wRCpyn40IfkKqtNfd0Cla2QtmkYq5zFuv7jox9deuGmaWcmOcNpV88mJiSKNXWsrWYEb8W00kFdRmDNK";
 
-\Stripe\Stripe::setApiKey($stripe_secret_key);
 
-// Fetch and validate form data
+
+
 $required_fields = ['firstname', 'lastname', 'email', 'address', 'zipcode', 'country', 'city', 'user_id', 'total_price', 'cart_items', 'phone'];
 foreach ($required_fields as $field) {
     if (empty($_POST[$field])) {
@@ -21,7 +20,7 @@ foreach ($required_fields as $field) {
     }
 }
 
-// Sanitize input data
+
 $firstname = htmlspecialchars($_POST['firstname']);
 $lastname = htmlspecialchars($_POST['lastname']);
 $email = htmlspecialchars($_POST['email']);
@@ -40,105 +39,216 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     die("Invalid email address.");
 }
 
-// Check stock availability
-foreach ($cart_items as $item) {
-    $size = htmlspecialchars($item["size"]);
-    $produkt_id = (int) $item["produkt_id"];
-    $quantity_requested = max(1, (int) $item["quantity"]);
-
-    // Query to check stock in the database
-    $query = "SELECT stock FROM sizes WHERE size = '$size' AND produkt_id = $produkt_id";
-    $result = mysqli_query($con, $query);
-
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        $available_stock = (int) $row['stock'];
-
-        // Check if requested quantity exceeds available stock
-        if ($quantity_requested > $available_stock) {
-            // Set a session variable to indicate the stock issue
-            $_SESSION['stock_error'] = "Stock unavailable for product ID: $produkt_id, Size: $size. Available stock: $available_stock.";
-            
-            // Redirect the user back to cart.php
-            header("Location: cart.php");
-            exit();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="./js/inactivity.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
         }
-    } else {
-        // Set a session variable to indicate an invalid product/size error
-        $_SESSION['stock_error'] = "Invalid product or size for product ID: $produkt_id, Size: $size.";
+        .checkout-container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        input {
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        #card-element {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        button {
+            padding: 0.75rem;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        button:disabled::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-top-color: transparent;
+            border-left-color: transparent;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        #payment-message {
+            color: red;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <h1>Payment Checkout</h1>
+        <form id="payment-form">
+            <input type="email" id="email" value="<?php echo $email; ?>" readonly>
+            <div id="card-element"><!-- Stripe Card Element will be inserted here --></div>
+            <input type="text" id="cardholder-name" placeholder="Cardholder's Name">
+            <button id="submit-button">Pay</button>
+            <p id="payment-message"></p>
+        </form>
+    </div>
 
-        // Redirect the user back to cart.php
-        header("Location: cart.php");
-        exit();
-    }
-}
-
-// Prepare line items for Stripe
-$line_items = [];
-foreach ($cart_items as $item) {
-    $line_items[] = [
-        "quantity" => max(1, (int) $item["quantity"]),
-        "price_data" => [
-            "currency" => "usd",
-            "unit_amount" => (int) ($item["price"] * 100), // Convert price to cents
-            "product_data" => [
-                "name" => htmlspecialchars($item["item_name"]) . " (" . htmlspecialchars($item["size"]) . ")",
-            ]
-        ]
-    ];
-}
-$line_items[] = [
-    "quantity" => 1,
-    "price_data" => [
-        "currency" => "usd",
-        "unit_amount" => 1000, // $10 in cents
-        "product_data" => [
-            "name" => "Shipping Fee",
-        ]
-    ]
-];
-
-// Optional: Store session data if needed on another page
-$_SESSION['firstname'] = $firstname;
-$_SESSION['lastname'] = $lastname;
-$_SESSION['email'] = $email;
-$_SESSION['address'] = $address;
-$_SESSION['zipcode'] = $zipcode;
-$_SESSION['country'] = $country;
-$_SESSION['city'] = $city;
-$_SESSION['phone'] = $phone;
-$_SESSION['total_price'] = $total_price;
-$_SESSION['cart_items'] = $cart_items;
-
-try {
-    $checkout_session = \Stripe\Checkout\Session::create([
-        "mode" => "payment",
-        "success_url" => "http://localhost/Ecom/user/success.php?session_id={CHECKOUT_SESSION_ID}",
-        "cancel_url" => "http://localhost/Ecom/user/cancel.php",
-        "locale" => "auto",
-        "line_items" => $line_items, // Includes the shipping fee
-        "payment_intent_data" => [
-            "metadata" => [
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            const postData = <?php echo json_encode([
+                "firstname" => $firstname,
+                "lastname" => $lastname,
+                "email" => $email,
+                "address" => $address,
+                "zipcode" => $zipcode,
+                "country" => $country,
+                "city" => $city,
+                "phone" => $phone,
                 "user_id" => $user_id,
-                "total_price" => $total_price + 10 // Include the shipping fee in metadata
-            ]
-        ],
-        "customer_email" => $email,
-    ]);
+                "total_price" => $total_price,
+                "cart_items" => $cart_items,
+            ]); ?>;
 
-    // Redirect to Stripe Checkout
-    header("Location: " . $checkout_session->url);
-    exit();
-} catch (\Stripe\Exception\ApiErrorException $e) {
-    error_log("Stripe API error: " . $e->getMessage());
-    http_response_code(500);
-    die("Error creating Stripe Checkout session.");
-} catch (Exception $e) {
-    error_log("General error: " . $e->getMessage());
-    http_response_code(500);
-    die("An error occurred while processing your request.");
-}
+            // Initialize Stripe
+            const stripe = Stripe("pk_test_51QfPWzD5IxD7HeGajBmJdJ03rOsok2gC5NWwcwRzJzEynALpu1FhwVhv3FbmAXH68WKq10M1rymh6jCVrPM2YR7300jpjUaFBr"); // Replace with your Stripe public key
+            const elements = stripe.elements();
+            const card = elements.create("card");
+            card.mount("#card-element");
+
+            const paymentForm = document.getElementById("payment-form");
+            const submitButton = document.getElementById("submit-button");
+            const paymentMessage = document.getElementById("payment-message");
+
+            paymentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    submitButton.disabled = true;
+
+    try {
+        const cardholderName = document.getElementById("cardholder-name").value;
+
+        if (!cardholderName.trim()) {
+            paymentMessage.textContent = "Please enter the cardholder's name.";
+            submitButton.disabled = false;
+            return;
+        }
+
+        // Send AJAX request to create a PaymentIntent
+        const response = await fetch("./controllers/ajax_payment.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData), 
+        });
+
+        const result = await response.json();
+
+        if (!result.clientSecret) {
+            paymentMessage.textContent = "Error creating payment intent.";
+            window.location.href = "./cancel.php";  // Redirect to cancel.php
+            return;
+        }
+
+        // Confirm payment using Stripe
+        const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
+            payment_method: {
+                card: card,
+                billing_details: {
+                    name: cardholderName,
+                },
+            },
+        });
+
+        if (error) {
+            paymentMessage.textContent = `Payment failed: ${error.message}`;
+            window.location.href = "./cancel.php";  
+        } else if (paymentIntent.status === "succeeded") {
+            
+            const dbResponse = await fetch("./controllers/save_order.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...postData, 
+                    payment_id: paymentIntent.id,
+                    payment_status: paymentIntent.status,
+                    
+                    payment_method: 'card',
+                }),
+            });
+
+            const dbResult = await dbResponse.json();
+
+            if (dbResult.status === "success") {
+                // Redirect to success page
+                window.location.href = "./success.php";
+            } else {
+                paymentMessage.textContent = "Error saving order: " + dbResult.message;
+            }
+        }
+    } catch (error) {
+        paymentMessage.textContent = `An error occurred: ${error.message}`;
+    } finally {
+        submitButton.disabled = false;
+    }
+});
 
 
+        });
+    </script>
+</body>
+<?php
 mysqli_close($con);
 ?>
+</html>

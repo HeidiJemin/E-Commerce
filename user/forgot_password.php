@@ -1,11 +1,11 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
+require_once('../includes/connect.php');
 
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Handle POST request (if needed)
+    // POST request 
     if (!isset($_SESSION['email'])) {
         echo json_encode(['status' => 'error', 'message' => 'Email not found in session.']);
         exit;
@@ -35,21 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           if (!emailRegex.test(email)) {
             toastr.error("Please enter a valid email address.");
-            return; // Prevent further processing
+            return; 
           }
 
           $.ajax({
     type: "POST",
-    url: "ajaxpass.php",
+    url: "./controllers/ajaxpass.php",
+    
     data: { action: "resetPassword", email: email },
     success: function (response) {
         try {
-            // Check if response is valid JSON
+            
             if (!response) {
                 throw new Error("Empty response from server.");
             }
 
-            response = JSON.parse(response); // Parse the JSON
+            response = JSON.parse(response); 
 
             if (response.status === "success") {
                 toastr.success(response.message);
@@ -73,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
       });
 
-      // Automatically show the modal on page load
+      
       document.addEventListener("DOMContentLoaded", function () {
         var modal = new mdb.Modal(document.getElementById("exampleModal"));
         modal.show();
@@ -81,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
   </head>
   <body>
-    <!-- Modal for Email Input -->
+    
     <div class="modal top fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
      aria-hidden="true" data-mdb-backdrop="static" data-mdb-keyboard="false">
   <div class="modal-dialog" style="width: 300px;">

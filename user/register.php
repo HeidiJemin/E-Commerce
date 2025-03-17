@@ -1,16 +1,64 @@
 <?php
-if (isset($_SESSION['id'])) {
-  // Check if the user has role_id = 1 (customer)
-  if ($_SESSION['role_id'] != 1) {
-      // If not role_id 1, redirect to admin page
-      header("Location: admin_manage/index.php");
-      exit();
-  }
+session_start();
+require_once('../includes/connect.php');
 
-  // If role_id is 1, redirect to index.php
-  header("Location: index.php");
-  exit();
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
+$adminPath = '../admin_manage/index.php';
+
+
+if (isset($_SESSION['id'])) {
+    if ($_SESSION['role_id'] != 1) {
+        header("Location: $adminPath");
+    } else {
+        header("Location: index.php");
+    }
+    exit();
 }
+
+
+if (isset($_COOKIE['remember_token'])) {
+    $rememberToken = mysqli_real_escape_string($con, $_COOKIE['remember_token']);
+
+    
+    $query = "SELECT user_id, email, remember_token, verified, username, role_id 
+              FROM users WHERE remember_token = '$rememberToken'";
+    $result = mysqli_query($con, $query);
+
+    if (!$result) {
+        
+        die("Database query failed: " . mysqli_error($con));
+    }
+
+    if (mysqli_num_rows($result) === 1) {
+        
+        $user = mysqli_fetch_assoc($result);
+
+        $_SESSION['id'] = $user['user_id'];
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['date_time'] = time();
+        $_SESSION['name'] = $user['username'];
+        $_SESSION['role_id'] = $user['role_id'];
+        $_SESSION['verified'] = $user['verified'];
+        $_SESSION['username'] = $user['username'];
+
+        
+        if ($_SESSION['role_id'] != 1) {
+            header("Location: $adminPath");
+        } else {
+            header("Location: index.php");
+        }
+        exit();
+    } else {
+        
+        setcookie('remember_token', '', time() - 3600, '/');
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,10 +66,11 @@ if (isset($_SESSION['id'])) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registration Form</title>
-  <link rel="stylesheet" href="style_reg.css">
+  <link rel="stylesheet" href="./css/style_reg.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <link rel="stylesheet" href="style_reg.css">
 
   
   <script>
@@ -43,7 +92,7 @@ if (isset($_SESSION['id'])) {
         "hideMethod": "fadeOut"
     }
     function register_user(event) {
-        event.preventDefault(); // Prevent form submission
+        event.preventDefault(); 
 
     var name = $("#name").val();
     var surname = $("#surname").val();
@@ -53,34 +102,34 @@ if (isset($_SESSION['id'])) {
     var confirmPassword = $("#conf_password").val();
     var termsAccepted = $("#terms").is(":checked");
 
-    var nameRegex = /^[A-Z][a-zA-Z ]{2,19}$/; // First letter capital, 3-20 chars
-    var usernameRegex = /^[a-zA-Z0-9-_]{3,20}$/; // Username rules
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Valid email format
-    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; // Strong password
+    var nameRegex = /^[A-Z][a-zA-Z ]{2,19}$/; 
+    var usernameRegex = /^[a-zA-Z0-9-_]{3,20}$/; 
+    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; 
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; 
 
     var error = 0;
 
-    // Validate first name
+    
     if (!nameRegex.test(name)) {
         $("#name").addClass("error");
-        $("#nameError").text("Emri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        $("#nameError").text("Emri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.No numbers!");
         error++;
     } else {
         $("#name").removeClass("error");
         $("#nameError").text("");
     }
 
-    // Validate surname
+    
     if (!nameRegex.test(surname)) {
         $("#surname").addClass("error");
-        $("#surnameError").text("Mbiemri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.");
+        $("#surnameError").text("Mbiemri duhet të fillojë me shkronjë të madhe, minimumi 3 karaktere.No numbers!");
         error++;
     } else {
         $("#surname").removeClass("error");
         $("#surnameError").text("");
     }
 
-    // Validate username
+    
     if (!usernameRegex.test(username)) {
         $("#username").addClass("error");
         $("#usernameError").text("Username duhet të jetë 3-20 karaktere dhe mund të përmbajë vetëm shkronja, numra, '-' ose '_'.");
@@ -90,7 +139,7 @@ if (isset($_SESSION['id'])) {
         $("#usernameError").text("");
     }
 
-    // Validate email
+    
     if (!emailRegex.test(email)) {
         $("#email").addClass("error");
         $("#emailError").text("Ju lutem vendosni një email të vlefshëm.");
@@ -100,7 +149,7 @@ if (isset($_SESSION['id'])) {
         $("#emailError").text("");
     }
 
-    // Validate password
+    
     if (!passwordRegex.test(password)) {
         $("#password").addClass("error");
         $("#passwordError").text("Password duhet të ketë min 8 karaktere, një shkronjë të madhe, një të vogël, një numër dhe një simbol.");
@@ -118,14 +167,14 @@ if (isset($_SESSION['id'])) {
         $("#confirmPasswordError").text("");
     }
 
-    // Validate terms acceptance
+    
     if (!termsAccepted) {
         $("#termsError").text("Duhet të pranoni termat dhe kushtet.");
         error++;
     } else {
         $("#termsError").text("");
     }
-    // If no errors, proceed with AJAX
+    
     if (error == 0) {
         var data = new FormData();
         data.append("action", "register");
@@ -136,10 +185,10 @@ if (isset($_SESSION['id'])) {
         data.append("password", password);
         data.append("conf_password", confirmPassword);
 
-        // AJAX call to the backend
+        
         $.ajax({
             type: "POST",
-            url: "ajax.php",
+            url: "./controllers/ajax.php",
             async: false,
             cache: false,
             processData: false,
@@ -150,13 +199,13 @@ if (isset($_SESSION['id'])) {
                 console.log(response);
 
                 if (call.status == 200) {
-                    toastr.success(response.message); // Use toastr for success message
+                    toastr.success(response.message); 
                     setTimeout(function () {
-                        window.location.href = "./verify.php"; // Redirect to verify page
+                        window.location.href = "./verify.php"; 
                     }, 2500);
                 } else {
-                    $("#" + response.tagError).text(response.message); // Display validation errors
-                    $("#" + response.tagElement).addClass('error'); // Highlight error field
+                    $("#" + response.tagError).text(response.message); 
+                    $("#" + response.tagElement).addClass('error'); 
                 }
             },
             error: function () {
@@ -168,12 +217,12 @@ if (isset($_SESSION['id'])) {
    
 
     function isEmpty(value) {
-    // Ensure value is a string before calling trim
+    
     return (value === undefined || value === null || value.trim() === "");
 }
 
 
-    // Show message function to display custom messages (like error messages)
+    
     function showMessage(message, type) {
         const messageElement = $("<div>").addClass("message " + type).text(message);
         $("body").append(messageElement);
@@ -234,7 +283,3 @@ if (isset($_SESSION['id'])) {
 });
 </script>
 </html>
-<?php
-// Close the database connection
-mysqli_close($con);
-?>

@@ -1,12 +1,17 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
+require_once('../includes/connect.php');
 
-// Redirect if email is not set in session
+
 if (!isset($_SESSION['email'])) {
     header("Location: ./forgot_password.php");
     exit;
 }
+
+if(isset($_SESSION['id'])){
+    header("location:profile.php");
+}
+
 
 $email = mysqli_real_escape_string($con, trim($_SESSION['email']));
 $query_get_verificationcode = "SELECT verification_code, username FROM users WHERE email = '$email'";
@@ -20,7 +25,7 @@ $row = mysqli_fetch_assoc($result_get_verificationcode);
 $username = isset($row['username']) ? $row['username'] : null;
 $verification_code = isset($row['verification_code']) ? $row['verification_code'] : null;
 
-// Redirect if no user data found
+
 if (!$username || !$verification_code) {
     header("Location: ./forgot_password.php");
     exit;
@@ -32,7 +37,7 @@ if (!$username || !$verification_code) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Verification</title>
-    <link rel="stylesheet" href="style_reg.css">
+    <link rel="stylesheet" href="./css/style_reg.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -43,15 +48,15 @@ if (!$username || !$verification_code) {
         <p>Welcome, <?php echo htmlspecialchars($username); ?>!</p>
         <form id="verificationForm" method="POST" onsubmit="changePassword(event);">
             <div class="input-box">
-                <input type="text" id="verificationCode" name="verificationCode" placeholder="Enter verification code" required>
+                <input type="text" id="verificationCode" name="verificationCode" placeholder="Enter verification code" >
                 <span id="verificationCodeError" class="error-message"></span>
             </div>
             <div class="input-box">
-                <input type="password" id="Password" name="Password" placeholder="Enter Password" required>
+                <input type="password" id="Password" name="Password" placeholder="Enter Password" >
                 <span id="PasswordError" class="error-message"></span>
             </div>
             <div class="input-box">
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" >
                 <span id="ConfirmPasswordError" class="error-message"></span>
             </div>
             <div class="input-box button">
@@ -69,9 +74,9 @@ if (!$username || !$verification_code) {
         };
 
         function changePassword(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault(); 
 
-            // Clear previous error messages
+         
             $(".error-message").text("");
 
             const verificationCode = $("#verificationCode").val().trim();
@@ -91,17 +96,26 @@ if (!$username || !$verification_code) {
                 hasError = true;
             }
 
-            // Check if passwords match
+            var passwordRegex =/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/ ;
+          
+            if (!passwordRegex.test(password)) {
+            $("#PasswordError").text("Password duhet të ketë min 8 karaktere, një shkronjë të madhe, një të vogël, një numër dhe një simbol.");
+            hasError = true ; 
+            }  
+
+          
+
+            
             if (password !== confirmPassword) {
                 $("#ConfirmPasswordError").text("Passwords do not match.");
                 hasError = true;
             }
 
             if (!hasError) {
-                // Make AJAX request
+                
                 $.ajax({
                     type: "POST",
-                    url: "ajaxpass.php",
+                    url: "./controllers/ajaxpass.php",
                     data: {
                         action: "changePassword",
                         verificationCode: verificationCode,
@@ -114,7 +128,7 @@ if (!$username || !$verification_code) {
                             if (response.success) {
                                 toastr.success(response.message);
                                 setTimeout(() => {
-                                    window.location.href = "./login.php"; // Redirect to login
+                                    window.location.href = "./login.php"; 
                                 }, 2000);
                             } else {
                                 toastr.error(response.message);
@@ -134,6 +148,6 @@ if (!$username || !$verification_code) {
 </body>
 </html>
 <?php
-// Close the database connection
+
 mysqli_close($con);
 ?>

@@ -72,10 +72,10 @@
   </div>
 </div>
 
-<!-- Initialize DataTable and Modal Logic -->
+
 <script>
   $(document).ready(function () {
-    // Initialize DataTable with empty state handling
+    
     var table = $('#ekipTable').DataTable({
       paging: true,
       searching: true,
@@ -89,17 +89,17 @@
           next: "Next",
           previous: "Previous"
         },
-        infoEmpty: "No Ekip available", // Custom message when no data is available
-        zeroRecords: "No records match your search", // Custom message when no records match search
+        infoEmpty: "No Ekip available", 
+        zeroRecords: "No records match your search", 
       }
     });
 
-    // Handle delete button click
+    
     $(document).on("click", ".delete-btn", function () {
       const ekipId = $(this).data("id");
       const ekipName = $(this).data("name");
-      $("#ekipName").text(ekipName); // Display ekip name in modal
-      $("#confirmDelete").data("id", ekipId); // Store ekip ID in confirm button
+      $("#ekipName").text(ekipName); 
+      $("#confirmDelete").data("id", ekipId); 
       $("#deleteModal").modal("show");
     });
 
@@ -107,15 +107,15 @@
     $("#confirmDelete").on("click", function () {
       const ekipId = $(this).data("id");
       $.ajax({
-        url: "delete_ekip.php",  // PHP file to handle deletion
+        url: "./controllers/delete_ekip.php",  
         type: "POST",
         data: { ekip_id: ekipId },
         success: function (response) {
           try {
-            const data = JSON.parse(response); // Parse the response to JSON
+            const data = JSON.parse(response); 
 
             if (data.success) {
-              // Show success toast
+              
               const toast = document.createElement('div');
               toast.style.position = 'fixed';
               toast.style.bottom = '20px';
@@ -128,13 +128,13 @@
               toast.textContent = data.message;
               document.body.appendChild(toast);
 
-              // Remove the toast after 3 seconds
+              
               setTimeout(() => toast.remove(), 3000);
 
-              // Remove the deleted row from the DataTable
+              
               table.row('#ekip-' + ekipId).remove().draw();
             } else {
-              // Show error toast
+              
               const toast = document.createElement('div');
               toast.style.position = 'fixed';
               toast.style.bottom = '20px';
@@ -147,7 +147,7 @@
               toast.textContent = data.message;
               document.body.appendChild(toast);
 
-              // Remove the toast after 3 seconds
+              
               setTimeout(() => toast.remove(), 3000);
             }
           } catch (e) {
@@ -158,7 +158,7 @@
           alert('There was an error processing your request.');
         },
         complete: function () {
-          // Close the modal after the deletion
+          
           $('#deleteModal').modal('hide');
         }
       });

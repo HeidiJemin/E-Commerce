@@ -1,22 +1,76 @@
 <?php
 session_start();
-include_once('../includes/connect.php');
-include_once('functions/common_function.php');
+require_once('../includes/connect.php');
+require_once('functions/common_function.php');
 
-// Ensure database connection is established
+
 if (!$con) {
     die("Error: " . mysqli_connect_error());
 }
 
-// Ensure the user is logged in
-if (!isset($_SESSION['id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+$adminPath = '../admin_manage/index.php';
+
+if (isset($_SESSION['id'])) {
+    
+    if ($_SESSION['role_id'] != 1) {
+        
+        header("Location: $adminPath");
+        exit();
+    }
+
+    
+} else {
+    
+    if (isset($_COOKIE['remember_token'])) {
+        $rememberToken = $_COOKIE['remember_token'];
+
+        
+        $query = "SELECT user_id, email, remember_token, verified, username, role_id FROM users WHERE remember_token = '$rememberToken'";
+        $result = mysqli_query($con, $query);
+
+        if ($result && mysqli_num_rows($result) == 1) {
+            
+            $user = mysqli_fetch_assoc($result);
+
+            
+            $_SESSION['id'] = $user['user_id'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['date_time'] = time();
+            $_SESSION['name'] = $user['username'];
+            $_SESSION['role_id'] = $user['role_id'];
+            $_SESSION['verified'] = $user['verified'];
+
+            
+            if ($user['role_id'] == 1) {
+                 
+            } else {
+                
+                header("Location: $adminPath");
+                exit();
+            }
+        } else {
+            
+            header("Location: login.php");
+            exit();
+        }
+    } else {
+        
+        header("Location: login.php");
+        exit();
+    }
+}
+
+
+$user_id = $_SESSION['id']; 
+$role_id = $_SESSION['role_id']; 
+
+
+if ($role_id != 1) {
+    header('Location: ../admin_manage/index.php');
     exit();
 }
 
-$user_id = $_SESSION['id']; // Get the logged-in user's ID
 
-// Fetch the user's data
 $query = "SELECT * FROM users WHERE user_id = '$user_id'";
 $result = mysqli_query($con, $query);
 
@@ -24,11 +78,13 @@ if (!$result) {
     die("Error: " . mysqli_error($con));
 }
 
-if ($result->num_rows === 0) {
+if (mysqli_num_rows($result) === 0) {
     die("User not found!");
 }
 
 $row = mysqli_fetch_assoc($result);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,19 +95,20 @@ $row = mysqli_fetch_assoc($result);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="profilestyle.css">
+    <link rel="stylesheet" href="./css/profilestyle.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="profilestyle.css">
+    <link rel="stylesheet" href="./css/profilestyle.css">
+    <script src="./js/inactivity.js" defer></script>
 
     
     <style>
        
 .navbar .nav-link {
-  color: white !important; /* White text for navbar links */
+  color: white !important; 
 }
 * {
   margin: 0;
@@ -60,18 +117,20 @@ $row = mysqli_fetch_assoc($result);
   font-family: "Istok Web", sans-serif;
 }
     </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 </head>
 <body>
 
-    <?php include('../includes/header.php'); ?> <!-- Including the header -->
+    <?php include('../includes/header.php'); ?> 
 
     <div class="container rounded bg-white mt-5 mb-5">
         <div class="row">
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                    <img id="profileImage" class="rounded-circle mt-5" width="150px" 
-                        src="<?= isset($row['foto']) && !empty($row['foto']) ? $row['foto'] : 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg'; ?>">
+                <img id="profileImage" class="rounded-circle mt-5" width="150px" 
+     src="<?= isset($row['foto']) && !empty($row['foto']) ? '../uploads/' . $row['foto'] : 'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg'; ?>">
+
                     <span class="font-weight-bold"><?= htmlspecialchars($row['username']) ?></span>
                     <span class="text-black-50"><?= htmlspecialchars($row['email']) ?></span>
                     <input type="file" id="fileInput" class="form-control mt-3" accept="image/*" style="display: none;">
@@ -84,7 +143,12 @@ $row = mysqli_fetch_assoc($result);
         onblur="this.style.background='#ffce00'; this.style.color='black'; this.style.boxShadow='none';">
     Choose Photo
 </button>
-
+<button id="deletePhotoButton" 
+                    style="background: #ff0000; color: white; box-shadow: none; border: none;" 
+                    class="btn mt-2" 
+                    onclick="deletePhoto(<?= $row['user_id'] ?>)">
+                    Delete Photo
+                </button>
 
                 </div>
             </div>
@@ -113,9 +177,18 @@ $row = mysqli_fetch_assoc($result);
                                 <span id="usernameError" class="text-danger"></span>
                             </div>
                             <div class="col-md-12">
-                                <label class="labels">Email</label>
+                            <label class="labels">Email</label>
+                            <div class="d-flex align-items-center">
                                 <input type="text" class="form-control" placeholder="Email Address" value="<?= htmlspecialchars($row['email']) ?>" id="email">
-                                <span id="emailError" class="text-danger"></span>
+                                <span class="ms-2">
+                                    <?php if (isset($_SESSION['verified']) && $_SESSION['verified']): ?>
+                                        <i class="fa-solid fa-circle-check text-success" title="Email Verified"></i>
+                                    <?php else: ?>
+                                        <i class="fa-solid fa-circle-xmark text-danger" title="Email Not Verified"></i>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <span id="emailError" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="mt-5 text-center">
@@ -170,9 +243,9 @@ function updateUser() {
     const email = $("#email").val();
     const id = $("#id").val();
 
-    const nameRegex = /^[A-Z][a-zA-Z ]{2,19}$/; // Starts with a capital letter, 3-20 characters
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    const nameRegex = /^[A-Z][a-zA-Z ]{2,19}$/; 
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; //email regex
+    const usernameRegex = /^[a-zA-Z0-9-_]{3,20}$/;
     let error = 0;
 
     // Validate name
@@ -204,6 +277,17 @@ function updateUser() {
         $("#username").removeClass('error');
         $("#usernameError").text("");
     }
+    //
+    if (!usernameRegex.test(username)) {
+        $("#username").addClass('error');
+        $("#usernameError").text("Username must 3-20 characters long and can contain only letters, numbers, '-' or '_'.");
+        error++;
+    } else {
+        $("#username").removeClass('error');
+        $("#userameError").text("");
+    }
+
+    //
 
     // Validate email
     if (!emailRegex.test(email)) {
@@ -221,7 +305,7 @@ function updateUser() {
 
     // Prepare form data for AJAX
     const formData = new FormData();
-    formData.append('action', 'updateUser'); // Add action parameter here
+    formData.append('action', 'updateUser'); 
     formData.append('id', id);
     formData.append('name', name);
     formData.append('surname', surname);
@@ -229,9 +313,9 @@ function updateUser() {
     formData.append('email', email);
     if (uploadedFile) formData.append('foto', uploadedFile);
 
-    // AJAX request
+    
     $.ajax({
-        url: 'ajax.php',
+        url: './controllers/ajax.php',
         type: 'POST',
         data: formData,
         contentType: false,
@@ -241,14 +325,14 @@ function updateUser() {
 
             if (res.status === 'error') {
                 if (res.field === 'email') {
-                    // Highlight email input and show the error message
+                    
                     $("#email").addClass('error');
                     $("#emailError").text(res.message);
                 } else {
                     alert(res.message);
                 }
             } else if (res.status === 'success') {
-                // Differentiate between email update and general update
+                
                 if (res.redirect) {
                     alert(res.message + " Please verify your new email address.");
                     window.location.href = res.redirect;
@@ -265,66 +349,96 @@ function updateUser() {
 }
 
 function updatePassword() {
-    var userId = $("#id").val(); // Ensure user ID is included
+    var userId = $("#id").val(); 
     var currentPassword = $("#currentPassword").val().trim();
     var newPassword = $("#newPassword").val().trim();
     var confirmPassword = $("#confirmPassword").val().trim();
 
-    // Clear previous error messages
+    
     $("#currentPasswordError").text("");
     $("#newPasswordError").text("");
     $("#confirmPasswordError").text("");
 
     var error = false;
 
-    // Validate current password
+    
     if (currentPassword === "") {
         $("#currentPasswordError").text("Current password is required.");
         error = true;
     }
 
-    // Validate new password
-    var passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    
+    var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/; 
     if (!passwordRegex.test(newPassword)) {
-        $("#newPasswordError").text("Password must be at least 8 characters long, include at least one letter and one number.");
+        $("#newPasswordError").text("At least one lowercase, one uppercase, one digit, one special character, and 8+ characters");
         error = true;
     }
 
-    // Validate confirm password
+    
     if (newPassword !== confirmPassword) {
         $("#confirmPasswordError").text("Passwords do not match.");
         error = true;
     }
 
-    if (error) return; // Stop if there are validation errors
+    if (error) return; 
 
-    // Send the AJAX request to update the password
+    
     $.ajax({
-        url: "ajax.php",
+        url: "./controllers/ajax.php",
         type: "POST",
         data: {
             action: "updatePassword",
-            id: userId, // Pass user ID
+            id: userId, 
             currentPassword: currentPassword,
             newPassword: newPassword
         },
         success: function (response) {
             var res = JSON.parse(response);
             if (res.success) {
-                // Show success message
+                
                 alert("Password updated successfully!");
 
-                // Clear input fields
+                
                 $("#currentPassword").val("");
                 $("#newPassword").val("");
                 $("#confirmPassword").val("");
             } else {
-                // Show the error message under the "Current Password" field
+                
                 $("#currentPasswordError").text(res.message);
             }
         },
         error: function () {
             alert("An error occurred while updating the password.");
+        }
+    });
+}
+
+
+    </script>
+
+
+
+<script>
+        function deletePhoto(userId) {
+    $.ajax({
+        type: "POST",
+        url: "./controllers/ajax.php",
+        data: {
+            action: "deletePhoto",
+            user_id: userId
+        },
+        success: function (response) {
+            console.log("Response from server:", response);
+            const res = JSON.parse(response);
+            if (res.success) {
+                alert("Photo deleted successfully!");
+                location.href = res.location;
+            } else {
+                alert("Error: " + res.message);
+            }
+        },
+        error: function () {
+            alert("AJAX request failed.");
         }
     });
 }
